@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Labor &amp; AI — UI Mockup v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:          #0e0f11;
+    --paper:        #f5f2ec;
+    --paper2:       #ece8df;
+    --paper3:       #e2ddd3;
+    --rule:         #d8d2c8;
+    --rule2:        #bfb8ad;
+    --text:         #1a1b1e;
+    --muted:        #7a736a;
+    --faint:        #b0a99f;
+    --accent:       #b5622a;
+    --accent2:      #c96e35;
+    --accent-light: #f7ece2;
+    --teal:         #8c4a1e;
+    --teal-light:   #f2e0d0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans:  'DM Sans', system-ui, sans-serif;
+    --mono:  'DM Mono', monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── TOGGLE BAR ── */
+  .toggle-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: var(--ink); padding: 8px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .toggle-bar span {
+    font-family: var(--mono); font-size: 10px;
+    color: #555; text-transform: uppercase; letter-spacing: 0.1em;
+    margin-right: 4px;
+  }
+  .toggle-btn {
+    background: transparent; border: 1px solid #3a3a3a;
+    color: #777; padding: 4px 14px; border-radius: 3px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+  }
+  .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .toggle-btn:hover:not(.active) { border-color: #666; color: #ccc; }
+
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── SHARED HEADER ── */
+  .site-header {
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 33px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-name { font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: -0.01em; }
+  .brand-sub { font-family: var(--mono); font-size: 9px; color: var(--faint); letter-spacing: 0.18em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .nav-link { font-size: 12px; color: var(--muted); text-decoration: none; }
+  .nav-link:hover { color: var(--text); }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
+
+  /* ══════════════════════════════
+     SCREEN 0 — AUTH
+  ══════════════════════════════ */
+  #screen-auth {
+    align-items: center; justify-content: center;
+    background: var(--paper); padding-top: 33px;
+  }
+  .auth-card {
+    max-width: 440px; width: 100%;
+    padding: 56px 48px; text-align: center;
+  }
+  .auth-eyebrow {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .auth-eyebrow::before, .auth-eyebrow::after {
+    content: ''; display: block; width: 32px; height: 1px; background: var(--rule2);
+  }
+  .auth-title {
+    font-family: var(--serif); font-size: 36px;
+    line-height: 1.2; color: var(--ink);
+    letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .auth-title em { font-style: italic; color: var(--accent); }
+  .auth-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
+  .github-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 14px 24px;
+    background: var(--ink); color: #fff; border: none; border-radius: 4px;
+    font-family: var(--sans); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s; text-decoration: none;
+    margin-bottom: 16px;
+  }
+  .github-btn:hover { background: #222; }
+  .github-icon { width: 18px; height: 18px; fill: #fff; }
+  .auth-note { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.6; }
+  .auth-divider { border: none; border-top: 1px solid var(--rule); margin: 36px 0; }
+  .auth-features { text-align: left; display: flex; flex-direction: column; gap: 12px; }
+  .auth-feature { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .auth-feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+
+  /* ══════════════════════════════
+     SCREEN 1 — POST-LOGIN (OCCUPATION ONLY)
+  ══════════════════════════════ */
+  #screen-select { background: var(--paper); }
+
+  .select-body {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 48px;
+  }
+  .select-inner { max-width: 520px; width: 100%; }
+
+  .select-hero { margin-bottom: 40px; }
+  .select-eyebrow {
+    font-family: var(--mono); font-size: 10px; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .select-eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--accent); }
+  .select-title {
+    font-family: var(--serif); font-size: 36px; line-height: 1.15;
+    color: var(--ink); letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .select-title em { font-style: italic; color: var(--accent); }
+  .select-sub { font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+  .field-label {
+    display: block; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .occ-input-wrap { position: relative; }
+  .occ-input {
+    width: 100%; padding: 14px 44px 14px 16px;
+    border: 1.5px solid var(--rule2); background: #fff;
+    border-radius: 4px; font-family: var(--sans); font-size: 15px;
+    color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .occ-input:focus { border-color: var(--accent); }
+  .occ-input::placeholder { color: var(--faint); }
+  .occ-input-icon {
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--faint); pointer-events: none; font-size: 14px;
+  }
+  .occ-hint {
+    font-family: var(--mono); font-size: 10px; color: var(--faint);
+    margin-top: 8px;
+  }
+
+  /* Dropdown */
+  .occ-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+    background: #fff; border: 1.5px solid var(--rule2);
+    border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+    overflow: hidden;
+  }
+  .dd-group {
+    padding: 8px 14px 5px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--faint);
+    background: var(--paper2); border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0;
+  }
+  .dd-item {
+    padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--rule);
+    transition: background 0.1s; display: flex; justify-content: space-between; align-items: center;
+  }
+  .dd-item:last-child { border-bottom: none; }
+  .dd-item:hover, .dd-item.sel { background: var(--accent-light); }
+  .dd-item-name { font-size: 13px; color: var(--text); font-weight: 500; }
+  .dd-item-code { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+
+  /* Loading state */
+  .loading-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 16px; padding: 60px 0;
+    color: var(--muted);
+  }
+  .loading-spinner {
+    width: 28px; height: 28px; border: 2px solid var(--rule2);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--mono); font-size: 11px; color: var(--faint); letter-spacing: 0.1em; }
+
+  /* ══════════════════════════════
+     SCREEN 2 — RESULTS
+  ══════════════════════════════ */
+  #screen-results { background: var(--paper); }
+  .results-body {
+    flex: 1; max-width: 720px; width: 100%;
+    margin: 0 auto; padding: 48px 48px 100px;
+  }
+
+  /* Context bar */
+  .context-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 28px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ctx-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .ctx-occ { font-size: 13px; font-weight: 500; }
+  .ctx-code { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+  .ctx-change {
+    font-family: var(--mono); font-size: 10px; color: var(--accent);
+    background: none; border: none; cursor: pointer; margin-left: 4px;
+  }
+  .ctx-change:hover { text-decoration: underline; }
+
+  /* Auto-generated summary heading */
+  .result-summary-heading {
+    font-family: var(--serif); font-size: 26px;
+    line-height: 1.3; color: var(--ink);
+    letter-spacing: -0.01em; margin-bottom: 28px;
+  }
+
+  /* Provenance line */
+  .provenance-line {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 28px; padding: 9px 14px;
+    background: var(--paper2); border-radius: 3px; border: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+  }
+  .prov-sep { color: var(--rule2); }
+  .prov-method { color: var(--teal); font-weight: 500; }
+
+  /* Prose */
+  .result-prose {
+    font-size: 15px; line-height: 1.85; color: var(--text); margin-bottom: 36px;
+  }
+  .result-prose p { margin-bottom: 18px; }
+  .result-prose p:last-child { margin-bottom: 0; }
+  .cit {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: var(--teal); color: #fff;
+    font-size: 8.5px; font-family: var(--mono); font-weight: 500;
+    vertical-align: super; margin-left: 1px;
+    text-decoration: none; cursor: pointer; transition: opacity 0.12s;
+  }
+  .cit:hover { opacity: 0.75; }
+
+  /* Data section */
+  .data-section { margin-bottom: 36px; }
+  .section-rule {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 20px;
+  }
+  .section-rule::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chart-card {
+    background: #fff; border: 1px solid var(--rule); border-radius: 4px; padding: 18px;
+  }
+  .chart-card-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+  }
+
+  /* Exposure */
+  .exp-score { font-family: var(--serif); font-size: 44px; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .exp-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+  .exp-track { height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+  .exp-fill { height: 100%; width: 62%; border-radius: 3px; background: linear-gradient(90deg, var(--teal), var(--accent)); }
+  .exp-rail { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 8.5px; color: var(--faint); margin-bottom: 12px; }
+  .exp-tier { display: inline-block; padding: 2px 9px; border-radius: 2px; font-family: var(--mono); font-size: 9px; font-weight: 500; background: #f7ece2; color: #8c4a1e; letter-spacing: 0.06em; }
+
+  /* Wage */
+  .wage-bars { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-bottom: 8px; }
+  .wb { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .wb-bar { width: 100%; background: var(--teal); border-radius: 2px 2px 0 0; opacity: 0.8; }
+  .wb-bar.hi { background: var(--accent); opacity: 1; }
+  .wb-val { font-family: var(--mono); font-size: 7.5px; color: var(--muted); white-space: nowrap; }
+  .wb-val.hi { color: var(--accent); font-weight: 500; }
+  .wb-lbl { font-family: var(--mono); font-size: 7.5px; color: var(--faint); }
+  .wage-source { font-family: var(--mono); font-size: 8.5px; color: var(--faint); }
+
+  /* Sources */
+  .sources-section { margin-bottom: 40px; }
+  .source-row { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+  .source-row:last-child { border-bottom: none; }
+  .source-badge {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--teal); color: #fff; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 8.5px; font-weight: 500; margin-top: 1px;
+  }
+  .source-title { font-size: 13px; font-weight: 500; color: var(--ink); text-decoration: none; display: block; line-height: 1.4; }
+  .source-title:hover { color: var(--accent); text-decoration: underline; }
+  .source-meta { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 2px; }
+
+  /* Follow-up section */
+  .followup-section { }
+  .followup-input-wrap { position: relative; margin-bottom: 10px; }
+  .followup-input {
+    width: 100%; padding: 12px 48px 12px 16px;
+    border: 1.5px solid var(--rule2); background: #fff;
+    border-radius: 4px; font-family: var(--sans); font-size: 14px;
+    color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .followup-input:focus { border-color: var(--accent); }
+  .followup-input::placeholder { color: var(--faint); }
+  .followup-send {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: var(--accent); border: none; color: #fff;
+    width: 28px; height: 28px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer;
+  }
+  .followup-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fc {
+    padding: 6px 11px; border: 1px solid var(--rule); background: var(--paper2);
+    border-radius: 3px; font-size: 11px; color: var(--muted);
+    cursor: pointer; transition: all 0.13s;
+  }
+  .fc:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  /* ── FOOTER ── */
+  .site-footer {
+    padding: 24px 48px;
+    border-top: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: auto;
+  }
+  .site-footer-text {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--faint); letter-spacing: 0.04em;
+  }
+  .site-footer-text a {
+    color: var(--faint); text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .site-footer-text a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="toggle-bar">
+  <span>Screens:</span>
+  <button class="toggle-btn active" onclick="show('auth',this)">0 — Sign in</button>
+  <button class="toggle-btn" onclick="show('select',this)">1 — Select occupation</button>
+  <button class="toggle-btn" onclick="show('loading',this)">2 — Loading</button>
+  <button class="toggle-btn" onclick="show('results',this)">3 — Results</button>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 0 — AUTH
+══════════════════════════════ -->
+<div class="screen active" id="screen-auth" style="margin-top:33px;align-items:center;justify-content:center;">
+  <div class="auth-card">
+    <div class="auth-eyebrow">Labor Market Intelligence</div>
+    <h1 class="auth-title">How is AI reshaping <em>your</em> career?</h1>
+    <p class="auth-desc">Answers about automation risk, job growth, and wages in plain English — grounded in BLS and Pew research data across 800+ occupations.</p>
+
+    <a href="#" class="github-btn">
+      <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+      </svg>
+      Continue with GitHub
+    </a>
+    <p class="auth-note">Only your GitHub username is requested — no repository or email access.</p>
+
+    <hr class="auth-divider"/>
+
+    <div class="auth-features">
+      <div class="auth-feature">
+        <div class="auth-feature-dot"></div>
+        <span>AI exposure scores for 800+ occupations from Pew Research Center's 2023 methodology</span>
+      </div>
+      <div class="auth-feature">
+        <div class="auth-feature-dot"></div>
+        <span>10-year employment projections from BLS, grounded in current labor market data</span>
+      </div>
+      <div class="auth-feature">
+        <div class="auth-feature-dot"></div>
+        <span>Answers synthesized from structured data and a curated research corpus</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 1 — SELECT OCCUPATION
+══════════════════════════════ -->
+<div class="screen" id="screen-select">
+  <div class="site-header">
+    <div class="brand">
+      <span class="brand-name">Labor &amp; AI</span>
+      <span class="brand-sub">workforce intelligence</span>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link">How it works</a>
+      <div class="user-chip">
+        <div class="user-avatar">J</div>
+        jpratt
+      </div>
+    </div>
+  </div>
+
+  <div class="select-body">
+    <div class="select-inner">
+      <div class="select-hero">
+        <div class="select-eyebrow">Labor Market Intelligence</div>
+        <h1 class="select-title">How is AI reshaping <em>your</em> career?</h1>
+        <p class="select-sub">Search for an occupation to get an instant analysis of AI exposure, job outlook, and wages.</p>
+      </div>
+
+      <label class="field-label">Occupation</label>
+      <div class="occ-input-wrap" id="occ-wrap-select">
+        <input class="occ-input" id="occ-input-select" type="text"
+          placeholder="Search — e.g. "software engineer", "software developer", "registered nurse"…"
+          oninput="handleSelectInput(this.value)"/>
+        <span class="occ-input-icon">↓</span>
+      </div>
+      <p class="occ-hint">Selecting an occupation will load your analysis automatically.</p>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p class="site-footer-text">Created with curiosity by <a href="https://pratt.jp" target="_blank" rel="noopener">JP</a>.</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 2 — LOADING
+══════════════════════════════ -->
+<div class="screen" id="screen-loading">
+  <div class="site-header">
+    <div class="brand">
+      <span class="brand-name">Labor &amp; AI</span>
+      <span class="brand-sub">workforce intelligence</span>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link">How it works</a>
+      <div class="user-chip">
+        <div class="user-avatar">J</div>
+        jpratt
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;justify-content:center;">
+    <div class="results-body">
+
+      <div class="context-bar">
+        <div class="ctx-dot"></div>
+        <span class="ctx-occ">Software Developers</span>
+        <span class="ctx-code">· SOC 15-1252</span>
+        <button class="ctx-change">Change →</button>
+      </div>
+
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Analyzing occupation data…</div>
+      </div>
+
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p class="site-footer-text">Created with curiosity by <a href="https://pratt.jp" target="_blank" rel="noopener">JP</a>.</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 3 — RESULTS
+══════════════════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="site-header">
+    <div class="brand">
+      <span class="brand-name">Labor &amp; AI</span>
+      <span class="brand-sub">workforce intelligence</span>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link">How it works</a>
+      <div class="user-chip">
+        <div class="user-avatar">J</div>
+        jpratt
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;justify-content:center;">
+    <div class="results-body">
+
+      <!-- Context bar -->
+      <div class="context-bar">
+        <div class="ctx-dot"></div>
+        <span class="ctx-occ">Software Developers</span>
+        <span class="ctx-code">· SOC 15-1252</span>
+        <button class="ctx-change">Change →</button>
+      </div>
+
+      <!-- Auto-generated summary heading -->
+      <div class="result-summary-heading">AI exposure & outlook for Software Developers</div>
+
+      <!-- Provenance line -->
+      <div class="provenance-line">
+        <span class="prov-method">structured data query + research retrieval</span>
+        <span class="prov-sep">·</span>
+        <span>BLS OEWS 2024</span>
+        <span class="prov-sep">·</span>
+        <span>Pew AI Exposure 2023</span>
+        <span class="prov-sep">·</span>
+        <span>BLS Projections 2023–2033</span>
+      </div>
+
+      <!-- Prose -->
+      <div class="result-prose">
+        <p>Software Developers occupy a nuanced middle ground on AI exposure. Pew Research Center's 2023 analysis assigns the occupation a <strong>moderate exposure score of 0.62</strong> — roughly 62% of associated tasks have meaningful automation potential, above the national median but well below the most exposed occupations like data entry and bookkeeping.<a href="#s1" class="cit">1</a></p>
+
+        <p>The distinction is <em>which</em> tasks are at risk. Routine coding work — boilerplate generation, test writing, documentation — is increasingly handled by AI assistants.<a href="#s2" class="cit">2</a> Higher-order work — system architecture, cross-functional technical leadership, evaluating tradeoffs under uncertainty — remains largely resistant to the current generation of tools.</p>
+
+        <p>Despite elevated AI exposure, Software Developer employment is projected to <strong>grow 26% between 2023 and 2033</strong>, adding roughly 380,000 jobs nationally.<a href="#s3" class="cit">3</a> The likely driver is the complementarity effect: AI tooling raises developer productivity, which expands the market for software, which increases demand for developers who can work effectively alongside those tools.</p>
+      </div>
+
+      <!-- Charts -->
+      <div class="data-section">
+        <div class="section-rule">Data</div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-card-title">AI Exposure Score</div>
+            <div class="exp-score">0.62</div>
+            <div class="exp-sub">out of 1.0 · Pew Research 2023</div>
+            <div class="exp-track"><div class="exp-fill"></div></div>
+            <div class="exp-rail"><span>Low</span><span>Medium</span><span>High</span></div>
+            <div class="exp-tier">Medium exposure</div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-title">Annual Wage Distribution</div>
+            <div class="wage-bars">
+              <div class="wb"><div class="wb-bar" style="height:25px"></div><div class="wb-val">$79k</div><div class="wb-lbl">p10</div></div>
+              <div class="wb"><div class="wb-bar" style="height:40px"></div><div class="wb-val">$108k</div><div class="wb-lbl">p25</div></div>
+              <div class="wb"><div class="wb-bar hi" style="height:60px"></div><div class="wb-val hi">$132k</div><div class="wb-lbl">median</div></div>
+              <div class="wb"><div class="wb-bar" style="height:74px"></div><div class="wb-val">$162k</div><div class="wb-lbl">p75</div></div>
+              <div class="wb"><div class="wb-bar" style="height:90px"></div><div class="wb-val">$208k</div><div class="wb-lbl">p90</div></div>
+            </div>
+            <div class="wage-source">BLS OEWS 2024 · National</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sources -->
+      <div class="sources-section">
+        <div class="section-rule">Sources</div>
+        <div class="source-row" id="s1">
+          <div class="source-badge">1</div>
+          <div>
+            <a href="#" class="source-title">AI and the Future of Work: Which U.S. Workers Are Most Exposed?</a>
+            <div class="source-meta">Pew Research Center · July 2023</div>
+          </div>
+        </div>
+        <div class="source-row" id="s2">
+          <div class="source-badge">2</div>
+          <div>
+            <a href="#" class="source-title">The Future of Jobs Report 2025</a>
+            <div class="source-meta">World Economic Forum · January 2025</div>
+          </div>
+        </div>
+        <div class="source-row" id="s3">
+          <div class="source-badge">3</div>
+          <div>
+            <a href="#" class="source-title">Employment Projections: 2023–2033 Summary</a>
+            <div class="source-meta">Bureau of Labor Statistics · September 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Follow-up -->
+      <div class="followup-section">
+        <div class="section-rule">Ask a follow-up</div>
+        <div class="followup-input-wrap">
+          <input class="followup-input" placeholder="Ask a question about Software Developers…"/>
+          <button class="followup-send">→</button>
+        </div>
+        <div class="followup-chips">
+          <button class="fc">Which specific tasks in my job are most at risk?</button>
+          <button class="fc">How does this compare to similar occupations?</button>
+          <button class="fc">How exposed is this role in California?</button>
+          <button class="fc">Is my field projected to grow or shrink?</button>
+          <button class="fc">What are economists saying about this field?</button>
+          <button class="fc">Where do I fall in the wage distribution?</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <footer class="site-footer">
+    <p class="site-footer-text">Created with curiosity by <a href="https://pratt.jp" target="_blank" rel="noopener">JP</a>.</p>
+  </footer>
+</div>
+
+<script>
+  function show(name, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function handleSelectInput(val) {
+    const wrap = document.getElementById('occ-wrap-select');
+    const existing = wrap.querySelector('.occ-dropdown');
+    if (existing) existing.remove();
+    if (val.length < 2) return;
+    const dd = document.createElement('div');
+    dd.className = 'occ-dropdown';
+    dd.innerHTML = `
+      <div class="dd-group">Computer and Mathematical Occupations</div>
+      <div class="dd-item sel">
+        <span class="dd-item-name">Software Developers</span>
+        <span class="dd-item-code">SOC 15-1252</span>
+      </div>
+      <div class="dd-item">
+        <span class="dd-item-name">Software Quality Assurance Analysts</span>
+        <span class="dd-item-code">SOC 15-1253</span>
+      </div>
+      <div class="dd-item">
+        <span class="dd-item-name">Web Developers</span>
+        <span class="dd-item-code">SOC 15-1254</span>
+      </div>
+      <div class="dd-group">Architecture and Engineering Occupations</div>
+      <div class="dd-item">
+        <span class="dd-item-name">Computer Hardware Engineers</span>
+        <span class="dd-item-code">SOC 17-2061</span>
+      </div>
+    `;
+    wrap.appendChild(dd);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Labor &amp; AI — API Spec v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper:        #f5f2ec;
+    --paper2:       #ece8df;
+    --paper3:       #e2ddd3;
+    --rule:         #d8d2c8;
+    --rule2:        #bfb8ad;
+    --ink:          #0e0f11;
+    --text:         #1a1b1e;
+    --muted:        #7a736a;
+    --faint:        #b0a99f;
+    --accent:       #b5622a;
+    --accent-light: #f7ece2;
+    --accent-dark:  #8c3f18;
+    --green:        #2e6b4a;
+    --green-light:  #eaf3ee;
+    --green-mid:    #c2dccb;
+    --amber:        #8a5a00;
+    --amber-light:  #fdf3dc;
+    --amber-mid:    #e8d090;
+    --purple:       #5a3a80;
+    --purple-light: #f2eef8;
+    --purple-mid:   #c8b8e0;
+    --red:          #9b2020;
+    --red-light:    #fdf0f0;
+    --red-mid:      #e0b8b8;
+    --blue:         #1e4a80;
+    --blue-light:   #eef3fa;
+    --blue-mid:     #b8cce0;
+    --get:          #1a5c2e;
+    --get-light:    #e8f5ec;
+    --get-mid:      #b8dcc4;
+    --post:         #7a4000;
+    --post-light:   #fdf0e0;
+    --post-mid:     #f0c888;
+    --serif:        'Source Serif 4', Georgia, serif;
+    --sans:         'IBM Plex Sans', system-ui, sans-serif;
+    --mono:         'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.65;
+    padding: 52px 32px 100px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    max-width: 960px; margin: 0 auto 52px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 28px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+  }
+  .page-header .label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  }
+  .page-header h1 {
+    font-family: var(--serif); font-size: 30px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--ink); margin-bottom: 12px; line-height: 1.15;
+  }
+  .page-header p { font-size: 13px; color: var(--muted); max-width: 560px; line-height: 1.8; }
+  .page-header-meta {
+    font-family: var(--mono); font-size: 9.5px; color: var(--faint);
+    text-align: right; line-height: 1.9; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    max-width: 960px; margin: 0 auto 52px;
+    background: #fff; border: 1px solid var(--rule);
+    border-radius: 6px; padding: 22px 26px;
+  }
+  .toc-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 18px;
+  }
+  .toc-section { margin-bottom: 14px; }
+  .toc-section:last-child { margin-bottom: 0; }
+  .toc-section-label {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+  }
+  .toc-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .toc-list a {
+    font-family: var(--mono); font-size: 11.5px; color: var(--accent);
+    text-decoration: none;
+  }
+  .toc-list a:hover { color: var(--accent-dark); text-decoration: underline; }
+
+  /* ── SECTION DIVIDER ── */
+  .group-label {
+    max-width: 960px; margin: 0 auto 28px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--amber);
+    padding-bottom: 10px; border-bottom: 1px solid var(--amber-mid);
+  }
+  .divider {
+    max-width: 960px; margin: 0 auto 64px;
+    border: none; border-top: 1px solid var(--rule);
+  }
+
+  /* ── ENDPOINT BLOCK ── */
+  .endpoint { max-width: 960px; margin: 0 auto 72px; }
+  .endpoint-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 16px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .method {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 3px; letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+  .method-get { background: var(--get-light); color: var(--get); border: 1px solid var(--get-mid); }
+  .method-post { background: var(--post-light); color: var(--post); border: 1px solid var(--post-mid); }
+  .endpoint-path {
+    font-family: var(--mono); font-size: 16px; font-weight: 500;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .endpoint-path .param { color: var(--accent); }
+  .endpoint-auth {
+    margin-left: auto; font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase; flex-shrink: 0;
+  }
+  .auth-required { color: var(--purple); background: var(--purple-light); border: 1px solid var(--purple-mid); padding: 2px 8px; border-radius: 3px; }
+  .auth-none { color: var(--faint); background: var(--paper2); border: 1px solid var(--rule); padding: 2px 8px; border-radius: 3px; }
+
+  .endpoint-desc { font-size: 13px; color: var(--muted); line-height: 1.85; margin-bottom: 24px; max-width: 680px; }
+
+  /* ── SUB-SECTIONS ── */
+  .spec-section { margin-bottom: 24px; }
+  .spec-section-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  /* ── PARAMS / FIELDS TABLE ── */
+  .spec-table {
+    width: 100%; border-collapse: collapse;
+    border: 1px solid var(--rule); border-radius: 6px; overflow: hidden;
+  }
+  .spec-table thead tr { background: var(--paper2); }
+  .spec-table thead th {
+    padding: 9px 13px; text-align: left;
+    font-family: var(--mono); font-size: 8.5px; color: var(--muted);
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+    border-bottom: 1px solid var(--rule);
+  }
+  .spec-table tbody tr { background: #fff; border-bottom: 1px solid var(--rule); }
+  .spec-table tbody tr:last-child { border-bottom: none; }
+  .spec-table tbody tr:hover { background: var(--paper); }
+  .spec-table td { padding: 11px 13px; vertical-align: top; font-size: 12.5px; }
+  .spec-table td:first-child { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .spec-table td:nth-child(2) { font-family: var(--mono); font-size: 11px; color: var(--green); white-space: nowrap; }
+  .spec-table td:last-child { color: var(--muted); line-height: 1.7; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--ink); color: #e2e8f0;
+    border-radius: 5px; padding: 18px 20px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.75;
+    overflow-x: auto; margin-bottom: 0;
+    white-space: pre;
+  }
+  .code-block .key { color: #93c5fd; }
+  .code-block .str { color: #86efac; }
+  .code-block .num { color: #fde68a; }
+  .code-block .cmt { color: #64748b; font-style: italic; }
+  .code-block .event { color: #f9a8d4; }
+  .code-wrap { border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+  .code-label {
+    background: var(--paper2); border-bottom: 1px solid var(--rule);
+    padding: 7px 14px;
+    font-family: var(--mono); font-size: 9px; color: var(--muted);
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block; font-family: var(--mono); font-size: 8px;
+    padding: 1px 6px; border-radius: 3px; margin-left: 5px;
+    vertical-align: middle; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-req { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); }
+  .badge-opt { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+  .badge-stream { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
+
+  /* ── CALLOUT BLOCKS ── */
+  .note {
+    background: var(--green-light); border: 1px solid var(--green-mid);
+    border-left: 3px solid var(--green); border-radius: 0 5px 5px 0;
+    padding: 13px 17px; margin-bottom: 20px;
+  }
+  .note-title {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 8px; font-weight: 600;
+  }
+  .note ul { list-style: none; }
+  .note li {
+    font-size: 12.5px; color: #2a5a3a; padding: 2px 0 2px 16px;
+    position: relative; line-height: 1.75;
+  }
+  .note li::before { content: '→'; position: absolute; left: 0; color: var(--green); opacity: 0.7; }
+  .note p { font-size: 12.5px; color: #2a5a3a; line-height: 1.75; }
+
+  .warn {
+    background: var(--amber-light); border: 1px solid var(--amber-mid);
+    border-left: 3px solid var(--amber); border-radius: 0 5px 5px 0;
+    padding: 13px 17px; margin-bottom: 20px;
+  }
+  .warn-title {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--amber); margin-bottom: 8px; font-weight: 600;
+  }
+  .warn p { font-size: 12.5px; color: #5a3a00; line-height: 1.75; }
+
+  /* ── ERRORS TABLE ── */
+  .errors-section { max-width: 960px; margin: 0 auto 56px; }
+  .errors-section h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    color: var(--ink); margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* ── AUTH SECTION ── */
+  .auth-section { max-width: 960px; margin: 0 auto 56px; }
+  .auth-section h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    color: var(--ink); margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .auth-section p { font-size: 13px; color: var(--muted); line-height: 1.85; margin-bottom: 14px; }
+
+  code { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
+
+  .conventions {
+    max-width: 960px; margin: 0 auto 56px;
+    background: #fff; border: 1px solid var(--rule);
+    border-radius: 6px; padding: 26px 28px;
+  }
+  .conventions h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    color: var(--ink); margin-bottom: 22px;
+  }
+  .conv-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); font-size: 12.5px; }
+  .conv-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .conv-rule { color: var(--text); font-weight: 600; margin-bottom: 4px; }
+  .conv-example { color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="label">Labor &amp; AI · FastAPI Service</div>
+    <h1>API Specification</h1>
+    <p>Four endpoints. All business logic is server-side. Streaming responses via SSE on analysis and message endpoints. Auth via Supabase JWT on all non-health endpoints.</p>
+  </div>
+  <div class="page-header-meta">v1 · March 2026<br>4 endpoints · Railway</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-section">
+    <div class="toc-section-label">Foundations</div>
+    <ul class="toc-list">
+      <li><a href="#conventions">Conventions</a></li>
+      <li><a href="#auth">Authentication</a></li>
+      <li><a href="#errors">Error responses</a></li>
+      <li><a href="#streaming">SSE streaming</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Endpoints</div>
+    <ul class="toc-list">
+      <li><a href="#health">GET /health</a></li>
+      <li><a href="#occupations">GET /occupations</a></li>
+      <li><a href="#post-analyses">POST /analyses</a></li>
+      <li><a href="#post-messages">POST /analyses/{analysis_id}/messages</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Claude Integration</div>
+    <ul class="toc-list">
+      <li><a href="#tools">Tool definitions</a></li>
+      <li><a href="#context">Context assembly</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- CONVENTIONS -->
+<div class="conventions" id="conventions">
+  <h2>Conventions</h2>
+  <div class="conv-item">
+    <div class="conv-rule">Base URL</div>
+    <div class="conv-example">All paths are relative to the Railway service root. e.g. <code>https://labor-ai-api.up.railway.app</code>. Configured via environment variable <code>API_BASE_URL</code> on the frontend.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Content type</div>
+    <div class="conv-example">All request bodies: <code>application/json</code>. Non-streaming responses: <code>application/json</code>. Streaming responses: <code>text/event-stream</code>.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">IDs</div>
+    <div class="conv-example">All IDs are UUIDs in string form. e.g. <code>"3fa85f64-5717-4562-b3fc-2c963f66afa6"</code>.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Timestamps</div>
+    <div class="conv-example">All timestamps returned as ISO 8601 UTC strings. e.g. <code>"2026-03-09T14:32:00.000Z"</code>.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Validation errors</div>
+    <div class="conv-example">FastAPI returns <code>422 Unprocessable Entity</code> with Pydantic's error detail for malformed request bodies — field name, location, and message. These are distinct from application-level <code>400</code> errors.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">CORS</div>
+    <div class="conv-example">FastAPI CORS middleware allows requests from the Vercel frontend origin only. Configured via environment variable <code>ALLOWED_ORIGIN</code>.</div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="auth-section" id="auth">
+  <h2>Authentication</h2>
+  <p>All endpoints except <code>GET /health</code> require a valid Supabase-issued JWT in the <code>Authorization</code> header.</p>
+  <div class="code-wrap" style="margin-bottom:20px;">
+    <div class="code-label">Request header</div>
+    <div class="code-block">Authorization: Bearer &lt;supabase_jwt&gt;</div>
+  </div>
+  <p>FastAPI uses a <code>get_current_user</code> dependency declared once and injected into each protected endpoint. The dependency:</p>
+  <div class="note" style="margin-top:14px;">
+    <div class="note-title">Dependency flow</div>
+    <ul>
+      <li>Extracts the JWT from the <code>Authorization</code> header. Returns <code>401</code> if absent or malformed.</li>
+      <li>Verifies the JWT signature against Supabase's public JWKS endpoint (<code>https://&lt;project&gt;.supabase.co/auth/v1/.well-known/jwks.json</code>). Returns <code>401</code> if invalid or expired.</li>
+      <li>Extracts <code>sub</code> claim (Supabase user ID) from the verified payload.</li>
+      <li>Looks up the corresponding <code>app_user</code> row by <code>supabase_user_id</code>. Returns <code>401</code> if not found — this would indicate a user who exists in Supabase Auth but has not yet completed first-login provisioning.</li>
+      <li>Returns the resolved <code>app_user</code> row to the endpoint. Downstream code never touches the raw JWT.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ERRORS -->
+<div class="errors-section" id="errors">
+  <h2>Error responses</h2>
+  <p style="font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:18px;">All error responses share a consistent JSON shape. SSE error events use the same <code>message</code> field.</p>
+  <div class="code-wrap" style="margin-bottom:24px;">
+    <div class="code-label">Error response shape</div>
+    <div class="code-block">{
+  <span class="key">"error"</span>: {
+    <span class="key">"code"</span>:    <span class="str">"RATE_LIMIT_EXCEEDED"</span>,   <span class="cmt">// machine-readable constant</span>
+    <span class="key">"message"</span>: <span class="str">"Query limit reached. Try again in 42 minutes."</span>
+  }
+}</div>
+  </div>
+  <table class="spec-table">
+    <thead>
+      <tr><th>Status</th><th>Code constant</th><th>When</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>400</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">BAD_REQUEST</td>
+        <td>Request is structurally valid (passes Pydantic) but semantically wrong — e.g. <code>soc_detailed_occupation_id</code> not found in the database.</td>
+      </tr>
+      <tr>
+        <td>401</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">UNAUTHORIZED</td>
+        <td>Missing, expired, or invalid JWT. Also returned if <code>app_user</code> row cannot be resolved from the token.</td>
+      </tr>
+      <tr>
+        <td>403</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">FORBIDDEN</td>
+        <td>The analysis exists but belongs to a different user. Ownership check failed.</td>
+      </tr>
+      <tr>
+        <td>404</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">NOT_FOUND</td>
+        <td><code>analysis_id</code> path parameter does not exist in <code>app_user_occupation_analysis</code>.</td>
+      </tr>
+      <tr>
+        <td>422</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">VALIDATION_ERROR</td>
+        <td>FastAPI/Pydantic validation failure — missing required field, wrong type, constraint violation (e.g. <code>message_text</code> exceeds 2,000 chars). Returns Pydantic's full error detail.</td>
+      </tr>
+      <tr>
+        <td>429</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">RATE_LIMIT_EXCEEDED</td>
+        <td>Per-user Upstash rate limit hit. Response includes <code>retry_after_seconds</code> in the error body.</td>
+      </tr>
+      <tr>
+        <td>500</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">INTERNAL_ERROR</td>
+        <td>Unhandled exception. Sentry captures the full trace. Message is deliberately vague to avoid leaking internals.</td>
+      </tr>
+      <tr>
+        <td>503</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--red);">UPSTREAM_UNAVAILABLE</td>
+        <td>Anthropic API or Supabase returned an error or timed out. Retryable — message indicates which upstream.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- STREAMING -->
+<div class="auth-section" id="streaming">
+  <h2>SSE streaming</h2>
+  <p>The two POST endpoints respond with <code>Content-Type: text/event-stream</code> via FastAPI's <code>StreamingResponse</code>. The connection stays open until the <code>done</code> or <code>error</code> event is sent.</p>
+  <p>Each SSE message follows the standard format: a named <code>event</code> line and a <code>data</code> line containing a JSON string.</p>
+
+  <div class="code-wrap" style="margin-bottom:20px;">
+    <div class="code-label">SSE event types</div>
+    <div class="code-block"><span class="event">event:</span> delta
+<span class="key">data:</span> {<span class="key">"text"</span>: <span class="str">"Software Developers occupy a nuanced..."</span>}
+
+<span class="event">event:</span> data
+<span class="key">data:</span> {<span class="key">"analysis_id"</span>: <span class="str">"3fa85f64-..."</span>, <span class="key">"summary_json"</span>: {...}}
+
+<span class="event">event:</span> done
+<span class="key">data:</span> {}
+
+<span class="event">event:</span> error
+<span class="key">data:</span> {<span class="key">"code"</span>: <span class="str">"UPSTREAM_UNAVAILABLE"</span>, <span class="key">"message"</span>: <span class="str">"Anthropic API timed out."</span>}</div>
+  </div>
+
+  <div class="note">
+    <div class="note-title">Event semantics</div>
+    <ul>
+      <li><code>delta</code> — one text chunk from Claude's streaming response. Accumulate these to build the full prose string. Sent throughout generation.</li>
+      <li><code>data</code> — sent once, immediately after the last <code>delta</code>. Contains the persisted record IDs and structured payload for chart rendering. On <code>POST /analyses</code> this includes <code>analysis_id</code> and <code>summary_json</code>. On <code>POST /analyses/{id}/messages</code> this includes <code>message_id</code>.</li>
+      <li><code>done</code> — stream is complete. Frontend closes the EventSource connection.</li>
+      <li><code>error</code> — something went wrong mid-stream. Frontend should surface the message to the user and close the connection. Sentry has already captured the trace on the backend.</li>
+    </ul>
+  </div>
+  <div class="warn">
+    <div class="warn-title">Rate limit timing</div>
+    <p>The Upstash rate limit check happens before the stream opens. A <code>429</code> is returned as a normal HTTP error response (not an SSE event) so the frontend can handle it without opening an EventSource at all.</p>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ENDPOINTS -->
+<div class="group-label">Endpoints</div>
+
+<!-- GET /health -->
+<div class="endpoint" id="health">
+  <div class="endpoint-header">
+    <span class="method method-get">GET</span>
+    <span class="endpoint-path">/health</span>
+    <span class="endpoint-auth auth-none">No auth</span>
+  </div>
+  <p class="endpoint-desc">Health check endpoint. Used by Railway to determine whether the container is ready to receive traffic. Returns immediately with no database or external service calls.</p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Response · 200 OK</div>
+    <div class="code-wrap">
+      <div class="code-label">application/json</div>
+      <div class="code-block">{
+  <span class="key">"status"</span>: <span class="str">"ok"</span>
+}</div>
+    </div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- GET /occupations -->
+<div class="endpoint" id="occupations">
+  <div class="endpoint-header">
+    <span class="method method-get">GET</span>
+    <span class="endpoint-path">/occupations</span>
+    <span class="endpoint-auth auth-required">Auth required</span>
+  </div>
+  <p class="endpoint-desc">
+    Returns the full list of ~830 detailed occupations from <code>soc_detailed_occupation</code>, joined to <code>soc_major_group</code> for grouping in the dropdown UI. This response is cached — the occupation list is static and loaded once from BLS. The frontend uses Fuse.js to run fuzzy search client-side against this list; there are no per-keystroke network calls.
+  </p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Response headers</div>
+    <table class="spec-table">
+      <thead><tr><th>Header</th><th>Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Cache-Control</td>
+          <td style="font-family:var(--mono);font-size:11px;color:var(--green);">public, max-age=86400</td>
+          <td>24-hour client cache. The dataset changes only when a new BLS SOC revision is loaded — rare enough that a manual cache bust (via deploy) is acceptable.</td>
+        </tr>
+        <tr>
+          <td>ETag</td>
+          <td style="font-family:var(--mono);font-size:11px;color:var(--green);">generated</td>
+          <td>Hash of the response body. Enables <code>304 Not Modified</code> on repeat requests within the cache window.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">Response · 200 OK</div>
+    <div class="code-wrap">
+      <div class="code-label">application/json</div>
+      <div class="code-block">{
+  <span class="key">"occupations"</span>: [
+    {
+      <span class="key">"id"</span>:                          <span class="str">"3fa85f64-5717-4562-b3fc-2c963f66afa6"</span>,
+      <span class="key">"detailed_occupation_code"</span>:    <span class="str">"15-1252"</span>,
+      <span class="key">"detailed_occupation_name"</span>:    <span class="str">"Software Developers"</span>,
+      <span class="key">"major_group_name"</span>:            <span class="str">"Computer and Mathematical Occupations"</span>
+    },
+    <span class="cmt">// ... ~830 records total</span>
+  ]
+}</div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:16px;">
+    <div class="note-title">Client-side search</div>
+    <ul>
+      <li>The frontend initialises a Fuse.js instance with this list on mount, keying on <code>detailed_occupation_name</code>.</li>
+      <li>Search runs in-memory on every debounced input event — no further API calls until the user selects an occupation.</li>
+      <li>Results are grouped by <code>major_group_name</code> for the dropdown's grouped display.</li>
+      <li>The <code>id</code> (UUID) is what gets submitted to <code>POST /analyses</code> — not the SOC code string.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- POST /analyses -->
+<div class="endpoint" id="post-analyses">
+  <div class="endpoint-header">
+    <span class="method method-post">POST</span>
+    <span class="endpoint-path">/analyses</span>
+    <span class="endpoint-auth auth-required">Auth required</span>
+    <span class="badge badge-stream">SSE stream</span>
+  </div>
+  <p class="endpoint-desc">
+    Creates a new occupation analysis session. Fetches structured data from Supabase, runs a vector similarity search against the research corpus, calls the Anthropic API (tool call round-trip + synthesis), persists the result to <code>app_user_occupation_analysis</code>, and streams Claude's prose response back to the client token by token. The structured data payload is sent as a single <code>data</code> event once generation is complete.
+  </p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Request body</div>
+    <table class="spec-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>soc_detailed_occupation_id <span class="badge badge-req">req</span></td>
+          <td>string · UUID</td>
+          <td>The <code>id</code> of the selected occupation from <code>soc_detailed_occupation</code>. Validated against the database — returns <code>400</code> if not found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">Server-side sequence</div>
+    <div class="note">
+      <ul>
+        <li><strong>1. Auth.</strong> Resolve <code>app_user</code> from JWT via dependency injection.</li>
+        <li><strong>2. Validate.</strong> Confirm <code>soc_detailed_occupation_id</code> exists. Return <code>400</code> if not.</li>
+        <li><strong>3. Rate limit.</strong> Increment per-user counter in Upstash. Return <code>429</code> if exceeded — before opening the stream.</li>
+        <li><strong>4. Data fetch.</strong> Query Supabase in a single round-trip: <code>occupation_geo_estimate</code> (national wages), <code>occupation_ai_exposure</code>, <code>occupation_projection</code>, <code>occupation_task</code> (top automatable tasks by importance score).</li>
+        <li><strong>5. Vector search.</strong> Embed the occupation name via Voyage AI. Run cosine similarity search against <code>research_chunk</code>. Retrieve top 4 chunks + join <code>research_source</code> for citation metadata.</li>
+        <li><strong>6. Claude call — round 1.</strong> Send system prompt + structured data + tool definitions. Claude returns <code>tool_use</code> blocks if it needs additional data. Execute any tool calls locally and send results back.</li>
+        <li><strong>7. Claude call — round 2.</strong> Claude synthesizes prose. Stream <code>delta</code> events to the client as tokens arrive.</li>
+        <li><strong>8. Persist.</strong> After the stream completes, insert <code>app_user_occupation_analysis</code> row with <code>summary_text</code>, <code>summary_json</code>, and <code>model_name</code>.</li>
+        <li><strong>9. data event.</strong> Send the <code>data</code> SSE event with <code>analysis_id</code> and <code>summary_json</code> for chart rendering.</li>
+        <li><strong>10. done event.</strong> Close the stream.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">SSE stream · delta events (during generation)</div>
+    <div class="code-wrap">
+      <div class="code-label">text/event-stream</div>
+      <div class="code-block"><span class="event">event:</span> delta
+<span class="key">data:</span> {<span class="key">"text"</span>: <span class="str">"Software Developers occupy"</span>}
+
+<span class="event">event:</span> delta
+<span class="key">data:</span> {<span class="key">"text"</span>: <span class="str">" a nuanced middle ground"</span>}
+
+<span class="cmt">// ... more delta events ...</span></div>
+    </div>
+  </div>
+
+  <div class="spec-section" style="margin-top:16px;">
+    <div class="spec-section-title">SSE stream · data event (after generation)</div>
+    <div class="code-wrap">
+      <div class="code-label">text/event-stream</div>
+      <div class="code-block"><span class="event">event:</span> data
+<span class="key">data:</span> {
+  <span class="key">"analysis_id"</span>: <span class="str">"3fa85f64-5717-4562-b3fc-2c963f66afa6"</span>,
+  <span class="key">"summary_json"</span>: {
+    <span class="key">"occupation"</span>: {
+      <span class="key">"id"</span>:    <span class="str">"3fa85f64-..."</span>,
+      <span class="key">"code"</span>:  <span class="str">"15-1252"</span>,
+      <span class="key">"name"</span>:  <span class="str">"Software Developers"</span>
+    },
+    <span class="key">"exposure"</span>: {
+      <span class="key">"score"</span>:               <span class="num">0.62</span>,
+      <span class="key">"tier"</span>:                <span class="str">"medium"</span>,
+      <span class="key">"tasks_automatable_pct"</span>: <span class="num">0.58</span>,
+      <span class="key">"source"</span>:              <span class="str">"pew_2023"</span>
+    },
+    <span class="key">"wages"</span>: {
+      <span class="key">"annual_mean_wage_usd"</span>:   <span class="num">138000</span>,
+      <span class="key">"annual_median_wage_usd"</span>: <span class="num">132000</span>,
+      <span class="key">"annual_wage_p10"</span>:        <span class="num">79000</span>,
+      <span class="key">"annual_wage_p25"</span>:        <span class="num">108000</span>,
+      <span class="key">"annual_wage_p75"</span>:        <span class="num">162000</span>,
+      <span class="key">"annual_wage_p90"</span>:        <span class="num">208000</span>,
+      <span class="key">"geo_type"</span>:              <span class="str">"national"</span>,
+      <span class="key">"survey_year"</span>:           <span class="num">2024</span>
+    },
+    <span class="key">"projection"</span>: {
+      <span class="key">"base_year"</span>:          <span class="num">2023</span>,
+      <span class="key">"projection_year"</span>:    <span class="num">2033</span>,
+      <span class="key">"base_employment"</span>:    <span class="num">1469200</span>,
+      <span class="key">"projected_employment"</span>: <span class="num">1849800</span>,
+      <span class="key">"change_abs"</span>:         <span class="num">380600</span>,
+      <span class="key">"change_pct"</span>:         <span class="num">25.9</span>,
+      <span class="key">"growth_category"</span>:    <span class="str">"Much faster than average"</span>
+    },
+    <span class="key">"top_automatable_tasks"</span>: [
+      {
+        <span class="key">"task_description"</span>: <span class="str">"Write code to create applications or programs."</span>,
+        <span class="key">"task_type"</span>:        <span class="str">"core"</span>,
+        <span class="key">"importance_score"</span>: <span class="num">4.8</span>
+      }
+    ],
+    <span class="key">"citations"</span>: [
+      {
+        <span class="key">"index"</span>:          <span class="num">1</span>,
+        <span class="key">"source_title"</span>:   <span class="str">"AI and the Future of Work"</span>,
+        <span class="key">"source_url"</span>:     <span class="str">"https://pewresearch.org/..."</span>,
+        <span class="key">"published_date"</span>: <span class="str">"2023-07-26"</span>
+      }
+    ]
+  }
+}</div>
+    </div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- POST /analyses/{analysis_id}/messages -->
+<div class="endpoint" id="post-messages">
+  <div class="endpoint-header">
+    <span class="method method-post">POST</span>
+    <span class="endpoint-path">/analyses/<span class="param">{analysis_id}</span>/messages</span>
+    <span class="endpoint-auth auth-required">Auth required</span>
+    <span class="badge badge-stream">SSE stream</span>
+  </div>
+  <p class="endpoint-desc">
+    Appends a user message to an analysis session and streams Claude's response. Validates that the analysis belongs to the requesting user. Persists both the user message and the assistant reply to <code>app_user_chat_message</code>. Claude receives condensed structured context plus the last 8 messages of conversation history, with tools available for fresh data retrieval if the question warrants it.
+  </p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Path parameters</div>
+    <table class="spec-table">
+      <thead><tr><th>Parameter</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>analysis_id <span class="badge badge-req">req</span></td>
+          <td>string · UUID</td>
+          <td>ID of the <code>app_user_occupation_analysis</code> session. Returns <code>404</code> if not found, <code>403</code> if it belongs to a different user.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">Request body</div>
+    <table class="spec-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>message_text <span class="badge badge-req">req</span></td>
+          <td>string</td>
+          <td>User's follow-up question. Max 2,000 characters — enforced by Pydantic, returns <code>422</code> if exceeded. Stored to <code>app_user_chat_message</code> after server-side validation and blocklist check.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">Server-side sequence</div>
+    <div class="note">
+      <ul>
+        <li><strong>1. Auth.</strong> Resolve <code>app_user</code> from JWT.</li>
+        <li><strong>2. Ownership check.</strong> Fetch <code>app_user_occupation_analysis</code> by <code>analysis_id</code>. Return <code>404</code> if not found. Return <code>403</code> if <code>app_user_id</code> does not match the requesting user.</li>
+        <li><strong>3. Input validation.</strong> Server-side blocklist check on <code>message_text</code> for prompt injection patterns. Reject with <code>400</code> if flagged.</li>
+        <li><strong>4. Rate limit.</strong> Increment per-user counter in Upstash. Return <code>429</code> if exceeded.</li>
+        <li><strong>5. Persist user message.</strong> Insert <code>app_user_chat_message</code> row with <code>role='user'</code>.</li>
+        <li><strong>6. Assemble context.</strong> Build condensed occupation context from <code>analysis.summary_json</code>. Fetch last 8 messages from <code>app_user_chat_message</code> ordered by <code>created_at_utc ASC</code>.</li>
+        <li><strong>7. Claude call — round 1.</strong> Send system prompt + condensed context + conversation history + tool definitions. Execute any tool calls Claude requests.</li>
+        <li><strong>8. Claude call — round 2.</strong> Stream <code>delta</code> events to client.</li>
+        <li><strong>9. Persist assistant message.</strong> Insert <code>app_user_chat_message</code> row with <code>role='assistant'</code>, <code>model_name</code>, <code>prompt_tokens</code>, <code>output_tokens</code>.</li>
+        <li><strong>10. data event.</strong> Send <code>message_id</code> of the persisted assistant reply.</li>
+        <li><strong>11. done event.</strong> Close the stream.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="spec-section" style="margin-top:20px;">
+    <div class="spec-section-title">SSE stream · data event (after generation)</div>
+    <div class="code-wrap">
+      <div class="code-label">text/event-stream</div>
+      <div class="code-block"><span class="event">event:</span> data
+<span class="key">data:</span> {
+  <span class="key">"message_id"</span>: <span class="str">"8d3b1c2a-4e5f-6789-abcd-ef0123456789"</span>,
+  <span class="key">"prompt_tokens"</span>:  <span class="num">842</span>,
+  <span class="key">"output_tokens"</span>:  <span class="num">317</span>
+}</div>
+    </div>
+  </div>
+
+  <div class="warn" style="margin-top:16px;">
+    <div class="warn-title">Context window discipline</div>
+    <p>Only the last 8 messages are sent to Claude on each follow-up call — older messages are not summarized in V1, simply excluded. This caps per-request token cost as conversations grow long. If Claude needs to reference something from much earlier in the conversation, the user should restate it.</p>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- CLAUDE INTEGRATION -->
+<div class="group-label">Claude Integration</div>
+
+<!-- TOOLS -->
+<div class="endpoint" id="tools">
+  <h2 style="font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule);">Tool definitions</h2>
+  <p class="endpoint-desc">Both tools are available on every Claude call — initial analysis and follow-up messages. Claude decides which (if any) to invoke based on the question and available context. FastAPI executes the tool locally and returns results in the follow-up request.</p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">query_database</div>
+    <div class="code-wrap" style="margin-bottom:16px;">
+      <div class="code-label">Tool definition</div>
+      <div class="code-block">{
+  <span class="key">"name"</span>: <span class="str">"query_database"</span>,
+  <span class="key">"description"</span>: <span class="str">"Retrieves structured occupation data from the database.
+Use this when you need wages, employment counts, AI exposure
+scores, employment projections, or task-level automation risk
+for a specific occupation. Do not use for qualitative
+research or cited evidence — use search_research for that."</span>,
+  <span class="key">"input_schema"</span>: {
+    <span class="key">"type"</span>: <span class="str">"object"</span>,
+    <span class="key">"properties"</span>: {
+      <span class="key">"soc_detailed_occupation_id"</span>: {
+        <span class="key">"type"</span>: <span class="str">"string"</span>,
+        <span class="key">"description"</span>: <span class="str">"UUID of the occupation to query."</span>
+      },
+      <span class="key">"fields"</span>: {
+        <span class="key">"type"</span>: <span class="str">"array"</span>,
+        <span class="key">"items"</span>: { <span class="key">"type"</span>: <span class="str">"string"</span>,
+          <span class="key">"enum"</span>: [<span class="str">"wages"</span>, <span class="str">"exposure"</span>, <span class="str">"projection"</span>, <span class="str">"tasks"</span>] },
+        <span class="key">"description"</span>: <span class="str">"Which data to fetch. Omit to fetch all."</span>
+      }
+    },
+    <span class="key">"required"</span>: [<span class="str">"soc_detailed_occupation_id"</span>]
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="spec-section" style="margin-top:24px;">
+    <div class="spec-section-title">search_research</div>
+    <div class="code-wrap">
+      <div class="code-label">Tool definition</div>
+      <div class="code-block">{
+  <span class="key">"name"</span>: <span class="str">"search_research"</span>,
+  <span class="key">"description"</span>: <span class="str">"Searches the research corpus for relevant passages
+using semantic similarity. Use this when you need qualitative
+context, expert opinion, or cited evidence about AI's impact
+on a specific occupation or the labor market broadly.
+Do not use for structured numeric data — use query_database
+for wages, scores, and projections."</span>,
+  <span class="key">"input_schema"</span>: {
+    <span class="key">"type"</span>: <span class="str">"object"</span>,
+    <span class="key">"properties"</span>: {
+      <span class="key">"query"</span>: {
+        <span class="key">"type"</span>: <span class="str">"string"</span>,
+        <span class="key">"description"</span>: <span class="str">"Natural language search query."</span>
+      },
+      <span class="key">"limit"</span>: {
+        <span class="key">"type"</span>: <span class="str">"integer"</span>,
+        <span class="key">"description"</span>: <span class="str">"Number of chunks to retrieve. Default 4, max 8."</span>,
+        <span class="key">"default"</span>: <span class="num">4</span>
+      }
+    },
+    <span class="key">"required"</span>: [<span class="str">"query"</span>]
+  }
+}</div>
+    </div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- CONTEXT ASSEMBLY -->
+<div class="endpoint" id="context">
+  <h2 style="font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule);">Context assembly</h2>
+  <p class="endpoint-desc">What FastAPI sends to Claude differs between the initial analysis call and follow-up messages. Both use the same system prompt; the user turn content differs.</p>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Initial analysis — full context (~800–1,000 tokens)</div>
+    <div class="code-wrap" style="margin-bottom:20px;">
+      <div class="code-label">User turn content (before tool calls)</div>
+      <div class="code-block">Occupation: Software Developers (SOC 15-1252)
+Major group: Computer and Mathematical Occupations
+
+EXPOSURE
+  Score: 0.62 (medium)
+  Tasks automatable: 58%
+  Top automatable tasks (by importance score):
+    - Write code to create applications or programs [4.8, core]
+    - Develop testing routines and procedures [4.2, core]
+    - Document technical specifications [3.9, supplemental]
+
+WAGES (BLS OEWS 2024, national)
+  p10: $79,000 | p25: $108,000 | median: $132,000
+  p75: $162,000 | p90: $208,000 | mean: $138,000
+
+PROJECTIONS (BLS 2023–2033)
+  Base: 1,469,200 jobs → Projected: 1,849,800 (+380,600, +25.9%)
+  Category: Much faster than average
+
+RESEARCH CHUNKS
+  [1] "WEF Future of Jobs 2025" (2025-01-01)
+  {chunk_text}
+
+  [2] "Pew AI and the Future of Work" (2023-07-26)
+  {chunk_text}
+
+  [3] "Goldman Sachs AI Labor Market Report" (2023-03-26)
+  {chunk_text}
+
+  [4] "BLS Occupational Outlook Handbook" (2024-09-04)
+  {chunk_text}
+
+Please analyze this occupation's AI exposure and outlook.</div>
+    </div>
+  </div>
+
+  <div class="spec-section">
+    <div class="spec-section-title">Follow-up messages — condensed context (~200–300 tokens)</div>
+    <div class="code-wrap">
+      <div class="code-label">System prompt addition for follow-ups</div>
+      <div class="code-block">OCCUPATION CONTEXT (Software Developers · SOC 15-1252)
+  Exposure: 0.62 (medium) | Tasks automatable: 58%
+  Wages: median $132k | p10: $79k | p90: $208k (BLS OEWS 2024)
+  Projection 2023–2033: +25.9% (much faster than average)
+
+PRIOR ANALYSIS SUMMARY:
+  {analysis.summary_text}
+
+The user is asking a follow-up question about this occupation.
+You have access to query_database and search_research tools
+if the question requires data not present in the context above.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

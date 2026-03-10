@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Labor Market AI — Schema Reference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080d18;
+    --surface: #0f172a;
+    --surface2: #1e293b;
+    --border: #1e293b;
+    --border2: #334155;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --faint: #334155;
+    --accent: #38bdf8;
+    --green: #3ecf8e;
+    --amber: #f59e0b;
+    --purple: #a78bfa;
+    --red: #f87171;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 40px 24px 80px;
+  }
+  .page-header { max-width: 900px; margin: 0 auto 48px; border-bottom: 1px solid var(--border2); padding-bottom: 24px; }
+  .page-header .label { color: var(--muted); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #f8fafc; margin-bottom: 10px; }
+  .page-header p { color: var(--muted); font-size: 12px; max-width: 620px; line-height: 1.8; }
+
+  .toc { max-width: 900px; margin: 0 auto 48px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
+  .toc-title { color: var(--muted); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+  .toc-section { margin-bottom: 14px; }
+  .toc-section:last-child { margin-bottom: 0; }
+  .toc-section-label { color: var(--muted); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+  .toc-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .toc-list a { color: var(--accent); text-decoration: none; font-size: 12px; }
+  .toc-list a:hover { text-decoration: underline; }
+
+  .group-label { max-width: 900px; margin: 0 auto 24px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); padding-bottom: 8px; border-bottom: 1px solid #78350f; }
+
+  .table-section { max-width: 900px; margin: 0 auto 56px; }
+  .table-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border2); }
+  .table-name { font-size: 16px; font-weight: 700; color: #f8fafc; letter-spacing: -0.01em; }
+  .table-name code { color: var(--accent); font-size: 14px; }
+  .table-source { font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 10px; white-space: nowrap; margin-top: 2px; }
+  .table-desc { color: var(--muted); font-size: 12px; margin-bottom: 20px; line-height: 1.8; max-width: 680px; }
+
+  .fields-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .fields-table thead tr { background: var(--surface2); }
+  .fields-table thead th { padding: 10px 14px; text-align: left; font-size: 9.5px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid var(--border2); }
+  .fields-table tbody tr { background: var(--surface); border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  .fields-table tbody tr:last-child { border-bottom: none; }
+  .fields-table tbody tr:hover { background: #131f35; }
+  .fields-table td { padding: 11px 14px; vertical-align: top; font-size: 12px; }
+  .field-name { color: #f8fafc; font-weight: 600; white-space: nowrap; }
+  .field-name.pk { color: var(--amber); }
+  .field-name.fk { color: var(--purple); }
+  .field-type { color: var(--green); white-space: nowrap; font-size: 11px; }
+  .field-source { color: var(--muted); font-size: 11px; }
+  .field-notes { color: #94a3b8; font-size: 11.5px; line-height: 1.7; }
+  code { color: var(--accent); }
+
+  .badge { display: inline-block; font-size: 9px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .badge-pk { background: #78350f; color: var(--amber); border: 1px solid #92400e; }
+  .badge-fk { background: #3b0764; color: var(--purple); border: 1px solid #6d28d9; }
+  .badge-opt { background: #0f2920; color: #4ade80; border: 1px solid #166534; }
+  .badge-req { background: #1a0a0a; color: var(--red); border: 1px solid #7f1d1d; }
+  .badge-gen { background: #172033; color: var(--accent); border: 1px solid #1e4976; }
+
+  .constraints { margin-top: 14px; background: #111822; border: 1px solid var(--border2); border-radius: 8px; padding: 14px 18px; }
+  .constraints-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
+  .constraints ul { list-style: none; }
+  .constraints li { font-size: 11.5px; color: #94a3b8; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
+  .constraints li::before { content: '◆'; position: absolute; left: 0; color: var(--faint); font-size: 8px; top: 5px; }
+
+  .note { margin-top: 14px; background: #0c1a0f; border: 1px solid #1a4a2a; border-left: 3px solid #3ecf8e; border-radius: 0 8px 8px 0; padding: 14px 18px; }
+  .note-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; font-weight: 700; }
+  .note ul { list-style: none; }
+  .note li { font-size: 11.5px; color: #86efac; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
+  .note li::before { content: '→'; position: absolute; left: 0; color: var(--green); opacity: 0.6; }
+
+  .open-q { margin-top: 14px; background: #140d1f; border: 1px solid #3b1f6b; border-left: 3px solid var(--purple); border-radius: 0 8px 8px 0; padding: 14px 18px; }
+  .open-q-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; font-weight: 700; }
+  .open-q ul { list-style: none; }
+  .open-q li { font-size: 11.5px; color: #c4b5fd; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
+  .open-q li::before { content: '?'; position: absolute; left: 0; color: var(--purple); opacity: 0.6; font-weight: 700; }
+
+  .divider { max-width: 900px; margin: 0 auto 56px; border: none; border-top: 1px solid var(--border); }
+
+  .conventions { max-width: 900px; margin: 0 auto 56px; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 24px; }
+  .conventions h2 { font-size: 14px; font-weight: 700; color: #f8fafc; margin-bottom: 20px; }
+  .conv-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); font-size: 11.5px; }
+  .conv-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .conv-rule { color: var(--text); font-weight: 600; margin-bottom: 4px; }
+  .conv-example { color: var(--muted); }
+
+  .rel-section { max-width: 900px; margin: 0 auto 56px; }
+  .rel-section h2 { font-size: 14px; font-weight: 700; color: #f8fafc; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border2); }
+  .rel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .rel-q { font-size: 11.5px; color: #94a3b8; margin-bottom: 8px; font-style: italic; }
+  .rel-tables { font-size: 11px; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="label">Labor Market AI · Data Model</div>
+  <h1>Schema Reference</h1>
+  <p>Field-by-field reference reflecting all naming and design decisions. Green callouts = rationale. Purple callouts = open questions still to resolve.</p>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-section">
+    <div class="toc-section-label">Naming Conventions</div>
+    <ul class="toc-list"><li><a href="#conventions">Conventions</a></li></ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">SOC Taxonomy — reference tables, loaded once</div>
+    <ul class="toc-list">
+      <li><a href="#soc_major_group">soc_major_group</a></li>
+      <li><a href="#soc_minor_group">soc_minor_group</a></li>
+      <li><a href="#soc_broad_occupation">soc_broad_occupation</a></li>
+      <li><a href="#soc_detailed_occupation">soc_detailed_occupation</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Operational — populated by ingestion scripts</div>
+    <ul class="toc-list">
+      <li><a href="#occupation_geo_estimate">occupation_geo_estimate</a></li>
+      <li><a href="#occupation_ai_exposure">occupation_ai_exposure</a></li>
+      <li><a href="#occupation_projection">occupation_projection</a></li>
+      <li><a href="#occupation_task">occupation_task</a></li>
+      <li><a href="#research_source">research_source</a></li>
+      <li><a href="#research_chunk">research_chunk</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Reference</div>
+    <ul class="toc-list"><li><a href="#relationships">Key joins</a></li></ul>
+  </div>
+</div>
+
+<!-- CONVENTIONS -->
+<div class="conventions" id="conventions">
+  <h2>Naming conventions</h2>
+  <div class="conv-item">
+    <div class="conv-rule">Table names: singular, snake_case</div>
+    <div class="conv-example"><code>occupation_task</code> not <code>occupation_tasks</code> — follows the original relational model; a table names a type, not a collection</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Be explicit — no ambiguous abbreviations</div>
+    <div class="conv-example"><code>detailed_occupation_code</code> not <code>soc_code</code>; <code>major_group_name</code> not <code>major_group</code>; <code>soc_detailed_occupation_id</code> not <code>occupation_id</code></div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Currency: append <code>_usd</code> to mean and median wage fields only</div>
+    <div class="conv-example"><code>annual_mean_wage_usd</code>, <code>annual_median_wage_usd</code> — percentile fields omit <code>_usd</code> as currency is established by context</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Wage time period: always explicit</div>
+    <div class="conv-example"><code>annual_mean_wage_usd</code> not <code>mean_wage</code></div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Percentile fields: <code>p{N}</code> format</div>
+    <div class="conv-example"><code>annual_wage_p10</code>, <code>annual_wage_p90</code> — distinct from <code>pct</code> which is reserved for percentage</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Percentage fields: <code>_pct</code> suffix</div>
+    <div class="conv-example"><code>tasks_automatable_pct</code> — never use <code>p{N}</code> format for percentages</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Boolean fields: <code>is_</code> prefix</div>
+    <div class="conv-example"><code>is_automatable</code> not <code>automatable</code></div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Timestamps (datetime with time zone): <code>_utc</code> suffix, always stored in UTC</div>
+    <div class="conv-example"><code>created_at_utc</code>, <code>updated_at_utc</code> on every table</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Dates (calendar date, no time component): no <code>_utc</code> suffix</div>
+    <div class="conv-example"><code>published_date</code> — a date has no timezone</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Surrogate PKs: UUID on all tables that need them, field named <code>id</code></div>
+    <div class="conv-example">Used where no meaningful natural key exists, or where the natural key alone can't guarantee uniqueness across data versions (e.g. SOC revision cycles)</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">FK field names: <code>{table_name}_id</code> for UUID surrogate FKs</div>
+    <div class="conv-example">e.g. <code>soc_detailed_occupation_id</code> on operational tables, <code>soc_major_group_id</code> on <code>soc_minor_group</code> — the <code>_id</code> suffix signals a UUID FK. String natural keys use descriptive names like <code>detailed_occupation_code</code>.</div>
+  </div>
+</div>
+
+<!-- SOC TABLES -->
+<div class="group-label">SOC Taxonomy Reference Tables — loaded once from BLS 2018 SOC Structure file, insertion order: major → minor → broad → detailed</div>
+
+<!-- SOC_MAJOR_GROUP -->
+<div class="table-section" id="soc_major_group">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>soc_major_group</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Top level of the SOC taxonomy. 23 groups.</div>
+    </div>
+    <div class="table-source">Source: BLS 2018 SOC Structure</div>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Necessary because <code>major_group_code</code> alone is not revision-safe as a PK — codes can change between SOC revisions.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">major_group_code</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"15-0000"</code>. Last four digits are always zeros at this level.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">major_group_name</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"Computer and Mathematical Occupations"</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">revision_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">SOC revision this row belongs to. Value: <code>2018</code> for all current data. Enables future coexistence of multiple SOC revisions without schema changes.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set to current UTC on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and on every update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (major_group_code, revision_year)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- SOC_MINOR_GROUP -->
+<div class="table-section" id="soc_minor_group">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>soc_minor_group</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Second level of the SOC taxonomy. ~100 groups.</div>
+    </div>
+    <div class="table-source">Source: BLS 2018 SOC Structure</div>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Referenced by <code>soc_broad_occupation.soc_minor_group_id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_major_group_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes">References <code>soc_major_group.id</code>. Derived from the first two digits of <code>minor_group_code</code> during ingestion.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">minor_group_code</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"15-1200"</code>. Last two digits are always zeros at this level.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">minor_group_name</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"Computer Occupations"</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">revision_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Value: <code>2018</code> for all current data.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (minor_group_code, revision_year)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- SOC_BROAD_OCCUPATION -->
+<div class="table-section" id="soc_broad_occupation">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>soc_broad_occupation</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Third level of the SOC taxonomy. ~450 groups.</div>
+    </div>
+    <div class="table-source">Source: BLS 2018 SOC Structure</div>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Referenced by <code>soc_detailed_occupation.soc_broad_occupation_id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_minor_group_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes">References <code>soc_minor_group.id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">broad_occupation_code</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"15-1250"</code>. Last digit is always zero at this level.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">broad_occupation_name</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"Software and Web Developers, Programmers, and Testers"</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">revision_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Value: <code>2018</code> for all current data.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (broad_occupation_code, revision_year)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- SOC_DETAILED_OCCUPATION -->
+<div class="table-section" id="soc_detailed_occupation">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>soc_detailed_occupation</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Leaf level of the SOC taxonomy. ~830 occupations. All operational tables reference this one.</div>
+    </div>
+    <div class="table-source">Source: BLS 2018 SOC Structure + O*NET descriptions</div>
+  </div>
+  <p class="table-desc">
+    The grain at which all employment, exposure, projection, and task data is recorded.
+    Serves the role of an <code>occupation</code> table for V1. A separate app-level <code>occupation</code>
+    table may be introduced later if app-specific fields are needed.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. All operational tables FK to this.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_broad_occupation_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes">References <code>soc_broad_occupation.id</code>. Enables traversal up the full hierarchy via joins.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">detailed_occupation_code</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"15-1252"</code>. The SOC code shared across OEWS, Pew, O*NET, and BLS projections — the natural join key across all source datasets.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">detailed_occupation_name</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS SOC</td>
+        <td class="field-notes">e.g. <code>"Software Developers"</code>. Official title, used in Claude's responses.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">description</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">str | null</span></td>
+        <td class="field-source">O*NET</td>
+        <td class="field-notes">Plain English description of what workers do. From O*NET, not BLS. e.g. <code>"Develop general computer applications software or specialized utility programs."</code></td>
+      </tr>
+      <tr>
+        <td><span class="field-name">revision_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Value: <code>2018</code> for all current data. SOC codes can change between revisions — this records which revision a code belongs to.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (detailed_occupation_code, revision_year)</li></ul>
+  </div>
+
+</div>
+<hr class="divider"/>
+
+<!-- OPERATIONAL TABLES -->
+<div class="group-label">Operational Tables — populated by ingestion scripts</div>
+
+<!-- OCCUPATION_GEO_ESTIMATE -->
+<div class="table-section" id="occupation_geo_estimate">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>occupation_geo_estimate</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Employment counts and wage estimates by occupation and geography. One row per occupation × geography × year.</div>
+    </div>
+    <div class="table-source">Source: BLS OEWS (annual)</div>
+  </div>
+  <p class="table-desc">
+    BLS surveys ~1.1 million employers annually. These are estimates derived from a survey, not a census —
+    hence the table name. BLS suppresses values where sample size is too small, so many fields are nullable.
+    Geography is stored inline (not normalized) — geo entities carry no independent attributes worth a separate table at this stage.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Logical key is the composite unique constraint below.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">References <code>soc_detailed_occupation</code>. Aggregate/group-level rows (codes ending in 0, 00, 0000) are filtered out during ingestion — only detailed occupation rows are loaded.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">survey_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Year of the OEWS survey. Latest available: 2024. Storing year enables multi-year accumulation for trend queries without schema changes.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">geo_type</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes"><code>"national"</code> | <code>"state"</code> | <code>"metro"</code>. BLS publishes three separate files per year — this field merges them into one table.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">geo_name</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">str | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Human-readable geography. e.g. <code>"California"</code> or <code>"San Francisco-Oakland-Hayward, CA"</code>. Null for national rows.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">geo_code</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">str | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Machine-readable geography code. FIPS for states (e.g. <code>"06"</code> = California), MSA code for metro areas. Null for national. Note: state FIPS and MSA codes come from different numbering systems and are not globally unique — always filter by <code>geo_type</code> alongside <code>geo_code</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">est_worker_count</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Estimated number of employed workers in this occupation and geography. Nullable — BLS suppresses small-sample estimates.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_mean_wage_usd</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Mean annual wage. Can be skewed upward by top earners — median is usually more representative.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_median_wage_usd</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">Median annual wage (50th percentile). Most commonly cited figure. "Half of workers in this occupation earn more than $X."</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_wage_p10</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">10th percentile annual wage. Proxy for entry-level / early-career compensation floor.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_wage_p25</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">25th percentile annual wage.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_wage_p75</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">75th percentile annual wage.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">annual_wage_p90</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS OEWS</td>
+        <td class="field-notes">90th percentile annual wage. Together the four percentile columns let a user roughly self-locate in their occupation's wage distribution.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (soc_detailed_occupation_id, geo_type, geo_code, survey_year)</li></ul>
+  </div>
+  <div class="note">
+    <div class="note-title">Notes</div>
+    <ul>
+      <li>Geo fields are inline — no separate reference table. Geography has no rich independent attributes to warrant normalization at this stage.</li>
+      <li>Ingestion is append-only by year — old year rows are retained, enabling trend queries over time.</li>
+      <li>BLS also publishes hourly wage figures in the same files — not included in V1 but naming would follow <code>hourly_mean_wage_usd</code> etc. if added later.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- OCCUPATION_AI_EXPOSURE -->
+<div class="table-section" id="occupation_ai_exposure">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>occupation_ai_exposure</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">AI automation exposure scores per occupation. One row per occupation per scoring methodology.</div>
+    </div>
+    <div class="table-source">Source: Pew Research Center (derived from O*NET task data)</div>
+  </div>
+  <p class="table-desc">
+    Pew evaluated each O*NET work activity for AI automatability and rolled scores up to the occupation level.
+    The surrogate PK + unique constraint on (code, source) allows future methodologies (Goldman, OECD, etc.)
+    to coexist as additional rows rather than replacing existing data.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Logical key is (soc_detailed_occupation_id, exposure_score_source).</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">Pew / O*NET</td>
+        <td class="field-notes">References <code>soc_detailed_occupation</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">exposure_score_source</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Identifies the methodology that produced the score. Value: <code>"pew_2023"</code> for all current data. Part of the unique constraint — allows multiple methodologies per occupation in future.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">exposure_score</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">float</span></td>
+        <td class="field-source">Pew</td>
+        <td class="field-notes">Normalized 0.0–1.0. Higher = more exposed. e.g. Data Entry Keyers ≈ 0.9, EMTs ≈ 0.15.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">exposure_tier</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes"><code>"high"</code> | <code>"medium"</code> | <code>"low"</code>. Bucketed from <code>exposure_score</code> at ingestion time.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">tasks_automatable_pct</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">float</span></td>
+        <td class="field-source">Pew / O*NET</td>
+        <td class="field-notes">Percentage of this occupation's tasks Pew classified as highly automatable. e.g. <code>0.72</code> = 72% of tasks. More interpretable than the normalized score for end users.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">exposure_summary</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">str | null</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Plain English explanation of why this occupation has this score. Generated once via Claude API after initial ingestion and stored permanently. Null until generation script is run.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (soc_detailed_occupation_id, exposure_score_source)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- OCCUPATION_PROJECTION -->
+<div class="table-section" id="occupation_projection">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>occupation_projection</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">10-year employment outlook per occupation. One row per occupation per projection cycle.</div>
+    </div>
+    <div class="table-source">Source: BLS Employment Projections 2023–2033 (published every 2 years)</div>
+  </div>
+  <p class="table-desc">
+    National-only — BLS does not publish projections at state or metro level.
+    Storing <code>base_year</code> and <code>projection_year</code> allows future cycles to coexist
+    as new rows rather than replacing current data.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Logical key is (soc_detailed_occupation_id, base_year).</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">References <code>soc_detailed_occupation</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">base_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Starting year of the projection cycle. <code>2023</code> for current data.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">projection_year</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Ending year of the projection cycle. <code>2033</code> for current data.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">base_employment</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Employment count in the base year. Denominator for percentage change calculations.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">projected_employment</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Projected employment count in <code>projection_year</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">change_abs</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Projected absolute change in number of jobs. Negative = shrinking field. Provided directly by BLS.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">change_pct</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">Percentage change in employment. e.g. <code>14.2</code> or <code>-8.1</code>. Most intuitive figure for end users.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">growth_category</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">str | null</span></td>
+        <td class="field-source">BLS</td>
+        <td class="field-notes">BLS plain-English label. e.g. <code>"Much faster than average"</code> | <code>"Faster than average"</code> | <code>"As fast as average"</code> | <code>"Slower than average"</code> | <code>"Decline"</code>. Provided directly by BLS.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (soc_detailed_occupation_id, base_year)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- OCCUPATION_TASK -->
+<div class="table-section" id="occupation_task">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>occupation_task</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Individual work tasks per occupation, with AI automation risk per task. ~10–30 rows per occupation.</div>
+    </div>
+    <div class="table-source">Source: O*NET task database + Pew automation classifications</div>
+  </div>
+  <p class="table-desc">
+    Where <code>occupation_ai_exposure</code> gives a single score per occupation, this table provides
+    the underlying task-level breakdown — which specific activities within the job are automatable.
+    Enables "which parts of my job are most at risk?" queries.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">O*NET</td>
+        <td class="field-notes">References <code>soc_detailed_occupation</code>. Many-to-one — each occupation has many tasks.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">task_description</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">O*NET</td>
+        <td class="field-notes">The actual task text. e.g. <code>"Write code to create applications or programs."</code> Directly surfaceable to users.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">task_type</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">O*NET</td>
+        <td class="field-notes"><code>"core"</code> = performed by most workers in the occupation. <code>"supplemental"</code> = performed by some. Core tasks are most relevant for exposure analysis.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">is_automatable</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">bool</span></td>
+        <td class="field-source">Pew</td>
+        <td class="field-notes">Pew's binary classification — is this task highly exposed to AI automation?</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">automation_risk_level</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">derived</td>
+        <td class="field-notes">More granular than the boolean: <code>"high"</code> | <code>"medium"</code> | <code>"low"</code>. Derived from Pew's underlying scores where available.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">importance_score</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">float | null</span></td>
+        <td class="field-source">O*NET</td>
+        <td class="field-notes">O*NET's importance rating for this task, 0–5 scale. Higher = more central to the job. Enables weighting exposure by task importance rather than just counting tasks.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<hr class="divider"/>
+
+<!-- RESEARCH_SOURCE -->
+<div class="table-section" id="research_source">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>research_source</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">One row per source document in the RAG corpus. Parent of <code>research_chunk</code>.</div>
+    </div>
+    <div class="table-source">Source: manually curated — WEF, Pew, BLS, journalism</div>
+  </div>
+  <p class="table-desc">
+    Holds all document-level metadata. The deduplication check on ingestion happens here —
+    look up <code>source_url</code> before processing a document. If it already exists, skip.
+    Not occupation-specific — any labor market or AI displacement research belongs here.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Referenced by <code>research_chunk.research_source_id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">source_url</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">URL of the original document. The deduplication key — unique constraint prevents the same document being ingested twice.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">source_title</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Human-readable name of the document. e.g. <code>"WEF Future of Jobs Report 2025"</code>. Surfaced to the user when Claude cites a source.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">source_type</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes"><code>"report"</code> | <code>"article"</code> | <code>"paper"</code> | <code>"government"</code>. Allows filtering retrieval by source type.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">published_date</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">date | null</span></td>
+        <td class="field-source">metadata</td>
+        <td class="field-notes">Publication date of the document. Plain <code>date</code> type — no time component, no timezone suffix. Null if unknown. Used to tell Claude how recent a source is.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (source_url)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- RESEARCH_CHUNK -->
+<div class="table-section" id="research_chunk">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>research_chunk</code></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Chunked text with vector embeddings. Child of <code>research_source</code>. The RAG retrieval unit.</div>
+    </div>
+    <div class="table-source">Source: chunked + embedded at ingestion time</div>
+  </div>
+  <p class="table-desc">
+    Each source document is split into overlapping chunks (~500 tokens, ~100 token overlap),
+    embedded via Voyage AI, and stored here. At query time the user's question is embedded
+    and the most similar chunks are retrieved via cosine similarity and fed to Claude.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">research_source_id</span><span class="badge badge-fk">FK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">References <code>research_source.id</code>. All chunks for a document share the same <code>research_source_id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">chunk_index</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">int</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">0-indexed position of this chunk within its source document. Allows reconstructing document order and fetching adjacent chunks when more context is needed.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">chunk_text</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">str</span></td>
+        <td class="field-source">ingestion</td>
+        <td class="field-notes">The actual text content (~400–600 tokens). Overlaps slightly with adjacent chunks to avoid cutting ideas mid-sentence. This is what Claude reads when a chunk is retrieved.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">embedding</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">vector(1024)</span></td>
+        <td class="field-source">Voyage AI</td>
+        <td class="field-notes">1024-dimensional float vector from Voyage AI's <code>voyage-3</code> model. Stored in pgvector's native <code>Vector</code> column. Used for cosine similarity search. Null until embedding script is run. Dimension is model-specific — document in a comment if the model changes.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">datetime</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul><li>UNIQUE (research_source_id, chunk_index)</li></ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- KEY JOINS -->
+<div class="rel-section" id="relationships">
+  <h2>Key joins — canonical questions → tables</h2>
+  <div class="rel-grid">
+    <div class="rel-card">
+      <div class="rel-q">"How exposed to AI is my job?"</div>
+      <div class="rel-tables">soc_detailed_occupation ⟶ occupation_ai_exposure</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Is my field projected to grow or shrink?"</div>
+      <div class="rel-tables">soc_detailed_occupation ⟶ occupation_projection</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Which specific tasks in my job are most at risk?"</div>
+      <div class="rel-tables">soc_detailed_occupation ⟶ occupation_task (is_automatable = true)</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"How exposed is my occupation in California?"</div>
+      <div class="rel-tables">occupation_ai_exposure + occupation_geo_estimate (geo_type='state', geo_name='California')</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Which jobs similar to mine have lower exposure?"</div>
+      <div class="rel-tables">soc_detailed_occupation (via soc_broad_occupation_id hierarchy) ⟶ occupation_ai_exposure ORDER BY exposure_score ASC</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Which exposed jobs are growing anyway?"</div>
+      <div class="rel-tables">occupation_ai_exposure (exposure_tier='high') ⟶ occupation_projection (change_pct > 0)</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"What do researchers say about AI risk in my field?"</div>
+      <div class="rel-tables">research_chunk (vector similarity search) ⟶ research_source (title, url, date for citation)</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Where do I fall in my occupation's wage distribution?"</div>
+      <div class="rel-tables">occupation_geo_estimate (geo_type='national') wage percentile columns</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

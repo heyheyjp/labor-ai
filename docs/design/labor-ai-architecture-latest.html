@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Labor & AI — System Architecture v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:          #0e0f11;
+    --paper:        #f5f2ec;
+    --paper2:       #ece8df;
+    --paper3:       #e2ddd3;
+    --rule:         #d8d2c8;
+    --rule2:        #bfb8ad;
+    --text:         #1a1b1e;
+    --muted:        #7a736a;
+    --faint:        #b0a99f;
+    --accent:       #b5622a;
+    --accent-light: #f7ece2;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans:  'IBM Plex Sans', system-ui, sans-serif;
+    --mono:  'IBM Plex Mono', monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 48px;
+    min-height: 100vh;
+  }
+
+  .doc-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .doc-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .doc-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .doc-title em { font-style: italic; color: var(--accent); }
+  .doc-meta {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--faint);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .svg-diagram {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .section-heading {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 44px;
+    max-width: 960px;
+  }
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .annot-table {
+    width: 100%;
+    max-width: 960px;
+    border-collapse: collapse;
+  }
+  .annot-table th {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 400;
+  }
+  .annot-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    font-size: 12px;
+  }
+  .annot-table tr:last-child td { border-bottom: none; }
+  .annot-table td:first-child {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    width: 150px;
+  }
+  .annot-table td:nth-child(2) {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    width: 200px;
+  }
+  .annot-table td:last-child {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div>
+    <div class="doc-eyebrow">Labor &amp; AI · System Architecture</div>
+    <h1 class="doc-title">Deployment <em>&amp;</em> Data Flow</h1>
+  </div>
+  <div class="doc-meta">
+    v3 · March 2026<br>
+    Railway backend · all services
+  </div>
+</div>
+
+<svg class="svg-diagram" viewBox="0 0 960 860" xmlns="http://www.w3.org/2000/svg"
+  font-family="'IBM Plex Sans', sans-serif">
+  <defs>
+    <!-- Arrow markers -->
+    <marker id="arr"       markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#bfb8ad"/></marker>
+    <marker id="arr-blue"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#2a4a7f"/></marker>
+    <marker id="arr-teal"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#2a6b6b"/></marker>
+    <marker id="arr-acc"   markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#b5622a"/></marker>
+    <marker id="arr-sky"   markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#0e76a8"/></marker>
+    <marker id="arr-purp"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#5a3a7f"/></marker>
+    <marker id="arr-red"   markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#9b2020"/></marker>
+  </defs>
+
+  <!-- ════════════════════════════════════════════
+       SWIM LANE BACKGROUNDS
+  ════════════════════════════════════════════ -->
+
+  <!-- LEFT LANE — Ingestion (one-time setup) -->
+  <rect x="12" y="12" width="310" height="640" rx="8"
+    fill="#f0ede6" stroke="#d0c8bc" stroke-width="1" opacity="0.7"/>
+  <text x="28" y="34" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#b0a99f" letter-spacing="0.22em">INGESTION — ONE-TIME SETUP</text>
+
+  <!-- RIGHT LANE — Query Runtime -->
+  <rect x="338" y="12" width="608" height="640" rx="8"
+    fill="#f5f2ec" stroke="#d8d2c8" stroke-width="1" opacity="0.5"/>
+  <text x="354" y="34" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#b0a99f" letter-spacing="0.22em">QUERY RUNTIME</text>
+
+  <!-- SHARED BOTTOM — Data layer -->
+  <rect x="12" y="668" width="934" height="176" rx="8"
+    fill="#e8f2e8" stroke="#b8d4b8" stroke-width="1" opacity="0.6"/>
+  <text x="28" y="690" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#5a8a5a" letter-spacing="0.22em">SHARED DATA LAYER · SUPABASE</text>
+
+  <!-- ════════════════════════════════════════════
+       INGESTION LANE NODES
+  ════════════════════════════════════════════ -->
+
+  <!-- Data Sources -->
+  <rect x="28" y="55" width="278" height="88" rx="4"
+    fill="#ece8df" stroke="#d0c8bc" stroke-width="1"/>
+  <text x="44" y="74" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#b0a99f" letter-spacing="0.16em">DATA SOURCES</text>
+  <text x="44" y="93" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">BLS OEWS + Projections</text>
+  <text x="44" y="110" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">O*NET tasks · Pew AI exposure</text>
+  <text x="44" y="126" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">WEF / journalism research docs</text>
+
+  <!-- Ingest Scripts -->
+  <rect x="28" y="210" width="278" height="72" rx="4"
+    fill="#e8eef7" stroke="#c0cfe0" stroke-width="1"/>
+  <text x="44" y="230" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#2a4a7f" letter-spacing="0.16em">INGEST SCRIPTS</text>
+  <text x="44" y="249" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">Python · run once</text>
+  <text x="44" y="267" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">parse CSVs → seed structured tables</text>
+
+  <!-- Voyage AI -->
+  <rect x="28" y="352" width="278" height="72" rx="4"
+    fill="#f0eaf7" stroke="#d0c0e8" stroke-width="1"/>
+  <text x="44" y="372" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#5a3a7f" letter-spacing="0.16em">VOYAGE AI</text>
+  <text x="44" y="391" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">Embeddings API</text>
+  <text x="44" y="409" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">voyage-3 · 1024-dim · text → vectors</text>
+
+  <!-- Ingestion arrows (dashed, sky blue) -->
+  <!-- Data Sources → Ingest Scripts -->
+  <line x1="167" y1="143" x2="167" y2="206"
+    stroke="#0e76a8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-sky)"/>
+  <rect x="106" y="165" width="122" height="14" rx="2" fill="#f0ede6"/>
+  <text x="167" y="176" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#0e76a8">raw files + URLs</text>
+
+  <!-- Ingest Scripts → Voyage AI (research text) -->
+  <line x1="167" y1="282" x2="167" y2="348"
+    stroke="#0e76a8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-sky)"/>
+  <rect x="99" y="305" width="136" height="14" rx="2" fill="#f0ede6"/>
+  <text x="167" y="316" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#0e76a8">research text chunks</text>
+
+  <!-- Voyage AI → Supabase (vectors) -->
+  <line x1="167" y1="424" x2="167" y2="664"
+    stroke="#0e76a8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-sky)"/>
+  <rect x="90" y="534" width="154" height="14" rx="2" fill="#f0ede6"/>
+  <text x="167" y="545" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#0e76a8">vectors + structured rows</text>
+
+  <!-- Ingest Scripts → Supabase direct (structured tables, faint) -->
+  <line x1="230" y1="282" x2="290" y2="664"
+    stroke="#0e76a8" stroke-width="0.8" stroke-dasharray="3,5" opacity="0.35" marker-end="url(#arr-sky)"/>
+  <rect x="222" y="456" width="104" height="14" rx="2" fill="#f0ede6" opacity="0.8"/>
+  <text x="274" y="467" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="7.5" fill="#0e76a8" opacity="0.6">structured rows</text>
+
+  <!-- ════════════════════════════════════════════
+       RUNTIME LANE NODES
+  ════════════════════════════════════════════ -->
+
+  <!-- User / Browser -->
+  <rect x="550" y="48" width="220" height="60" rx="4"
+    fill="#dde5f0" stroke="#c0cfe0" stroke-width="1"/>
+  <text x="566" y="68" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#2a4a7f" letter-spacing="0.16em">BROWSER</text>
+  <text x="600" y="68" font-family="'IBM Plex Sans',sans-serif"
+    font-size="13" fill="#1e293b">👤</text>
+  <text x="566" y="88" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">User / Browser</text>
+  <text x="566" y="101" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">GitHub authed · HTTPS</text>
+
+  <!-- GitHub OAuth (external, top right) -->
+  <rect x="796" y="48" width="138" height="60" rx="4"
+    fill="#d4e8e8" stroke="#b0d0d0" stroke-width="1"/>
+  <text x="812" y="68" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#2a6b6b" letter-spacing="0.14em">AUTH</text>
+  <text x="812" y="86" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">GitHub OAuth</text>
+  <text x="812" y="100" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">read:user only</text>
+
+  <!-- Vercel / Next.js -->
+  <rect x="354" y="180" width="540" height="72" rx="4"
+    fill="#0e0f11" stroke="#2a2b2e" stroke-width="1"/>
+  <text x="370" y="200" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#555" letter-spacing="0.16em">VERCEL · EDGE NETWORK</text>
+  <text x="370" y="222" font-family="'IBM Plex Sans',sans-serif"
+    font-size="13" font-weight="600" fill="#ffffff">Next.js · React · TypeScript</text>
+  <text x="370" y="240" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#888">Auth.js + GitHub OAuth · Sentry Browser SDK · IP rate limiting at edge</text>
+
+  <!-- Railway / FastAPI -->
+  <rect x="354" y="326" width="540" height="72" rx="4"
+    fill="#f7ece2" stroke="#e0c4b0" stroke-width="1"/>
+  <text x="370" y="346" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#b5622a" letter-spacing="0.16em">RAILWAY · BACKEND · HOBBY PLAN ~$10–15/MO</text>
+  <text x="370" y="367" font-family="'IBM Plex Sans',sans-serif"
+    font-size="13" font-weight="600" fill="#0e0f11">FastAPI · Python</text>
+  <text x="370" y="385" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">validates JWT · checks rate limit · orchestrates Claude tool calls · Sentry Python SDK</text>
+
+  <!-- Sentry (observability, side) -->
+  <rect x="856" y="200" width="92" height="170" rx="4"
+    fill="#12122a" stroke="#4040a0" stroke-width="1"/>
+  <text x="902" y="274" text-anchor="middle" font-size="22" fill="#6366f1">⬡</text>
+  <text x="902" y="302" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="10" font-weight="500" fill="#818cf8">Sentry</text>
+  <text x="902" y="318" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#818cf8" opacity="0.6">Observability</text>
+  <text x="902" y="334" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#818cf8" opacity="0.6">errors · perf</text>
+  <text x="902" y="350" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#818cf8" opacity="0.45">frontend +</text>
+  <text x="902" y="363" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+    font-size="8" fill="#818cf8" opacity="0.45">backend</text>
+
+  <!-- Anthropic Claude -->
+  <rect x="780" y="460" width="160" height="72" rx="4"
+    fill="#f7ece2" stroke="#e0c4b0" stroke-width="1"/>
+  <text x="796" y="480" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#b5622a" letter-spacing="0.14em">ANTHROPIC API</text>
+  <text x="796" y="499" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">Claude Sonnet</text>
+  <text x="796" y="515" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">prose synthesis</text>
+  <text x="796" y="528" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">tool call orchestration</text>
+
+  <!-- Upstash Redis -->
+  <rect x="590" y="460" width="170" height="72" rx="4"
+    fill="#e8f0f7" stroke="#b8c8dc" stroke-width="1"/>
+  <text x="606" y="480" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#2a4a7f" letter-spacing="0.14em">UPSTASH REDIS</text>
+  <text x="606" y="499" font-family="'IBM Plex Sans',sans-serif"
+    font-size="12" font-weight="600" fill="#0e0f11">Rate Limiting</text>
+  <text x="606" y="515" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">per-user · keyed by</text>
+  <text x="606" y="528" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">GitHub user ID · TTL hourly</text>
+
+  <!-- ════════════════════════════════════════════
+       SHARED DATA LAYER NODES
+  ════════════════════════════════════════════ -->
+
+  <!-- Supabase Postgres -->
+  <rect x="28" y="700" width="440" height="128" rx="4"
+    fill="#d4edd4" stroke="#9acc9a" stroke-width="1.5"/>
+  <text x="44" y="722" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#3a6b3a" letter-spacing="0.16em">SUPABASE · POSTGRES + PGVECTOR · FREE TIER</text>
+  <text x="44" y="745" font-family="'IBM Plex Sans',sans-serif"
+    font-size="13" font-weight="600" fill="#0e0f11">Structured Tables</text>
+  <text x="44" y="762" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">soc_major/minor/broad/detailed_occupation</text>
+  <text x="44" y="776" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">occupation_geo_estimate · occupation_ai_exposure</text>
+  <text x="44" y="790" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">occupation_projection · occupation_task</text>
+  <text x="44" y="810" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">← written by ingestion · read by FastAPI →</text>
+
+  <!-- Supabase pgvector -->
+  <rect x="488" y="700" width="458" height="128" rx="4"
+    fill="#d4edd4" stroke="#9acc9a" stroke-width="1.5"/>
+  <text x="504" y="722" font-family="'IBM Plex Mono',monospace" font-size="8"
+    fill="#3a6b3a" letter-spacing="0.16em">SUPABASE · PGVECTOR</text>
+  <text x="504" y="745" font-family="'IBM Plex Sans',sans-serif"
+    font-size="13" font-weight="600" fill="#0e0f11">Vector Store · RAG Corpus</text>
+  <text x="504" y="762" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">research_source — document metadata + citation info</text>
+  <text x="504" y="776" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">research_chunk — text + vector(1024) from Voyage AI</text>
+  <text x="504" y="790" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#3a6b3a">cosine similarity search at query time</text>
+  <text x="504" y="810" font-family="'IBM Plex Mono',monospace"
+    font-size="9" fill="#7a736a">← written by ingestion · read by FastAPI →</text>
+
+  <!-- ════════════════════════════════════════════
+       RUNTIME ARROWS
+  ════════════════════════════════════════════ -->
+
+  <!-- User → GitHub OAuth -->
+  <line x1="770" y1="72" x2="792" y2="72"
+    stroke="#2a6b6b" stroke-width="1.2" marker-end="url(#arr-teal)"/>
+  <text x="772" y="64" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#2a6b6b">OAuth</text>
+
+  <!-- GitHub OAuth → User (token back) -->
+  <line x1="792" y1="86" x2="770" y2="86"
+    stroke="#2a6b6b" stroke-width="1.2" marker-end="url(#arr-teal)"/>
+  <text x="772" y="98" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#2a6b6b">JWT</text>
+
+  <!-- User → Vercel (HTTPS) -->
+  <line x1="660" y1="108" x2="624" y2="176"
+    stroke="#2a4a7f" stroke-width="1.2" marker-end="url(#arr-blue)"/>
+  <text x="596" y="148" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#2a4a7f">HTTPS request</text>
+
+  <!-- Vercel → Railway -->
+  <line x1="624" y1="252" x2="624" y2="322"
+    stroke="#bfb8ad" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="630" y="292" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#b0a99f">authed API call</text>
+
+  <!-- Sentry ↔ Vercel (dashed, right side) -->
+  <line x1="854" y1="228" x2="898" y2="228"
+    stroke="#6366f1" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="856" y="222" font-family="'IBM Plex Mono',monospace" font-size="7" fill="#6366f1" opacity="0.7">Browser SDK</text>
+
+  <!-- Sentry ↔ Railway (dashed, right side) -->
+  <line x1="854" y1="362" x2="898" y2="362"
+    stroke="#6366f1" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="856" y="378" font-family="'IBM Plex Mono',monospace" font-size="7" fill="#6366f1" opacity="0.7">Python SDK</text>
+
+  <!-- Railway → Upstash (rate limit check) -->
+  <line x1="624" y1="398" x2="675" y2="456"
+    stroke="#2a4a7f" stroke-width="1.2" marker-end="url(#arr-blue)"/>
+  <text x="598" y="434" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#2a4a7f">check / incr</text>
+
+  <!-- Railway → Claude (LLM call) -->
+  <line x1="780" y1="398" x2="850" y2="456"
+    stroke="#b5622a" stroke-width="1.2" marker-end="url(#arr-acc)"/>
+  <text x="796" y="430" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#b5622a">tool call prompt</text>
+
+  <!-- Claude → Railway (response) -->
+  <line x1="840" y1="474" x2="792" y2="416"
+    stroke="#b5622a" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-acc)"/>
+  <text x="840" y="448" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#b5622a">prose + citations</text>
+
+  <!-- Railway → Supabase (SQL query) -->
+  <line x1="510" y1="398" x2="248" y2="696"
+    stroke="#3a6b3a" stroke-width="1.2" marker-end="url(#arr-teal)"/>
+  <text x="316" y="555" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#3a6b3a">SQL query</text>
+
+  <!-- Railway → Supabase pgvector (vector search) -->
+  <line x1="624" y1="398" x2="660" y2="696"
+    stroke="#3a6b3a" stroke-width="1.2" marker-end="url(#arr-teal)"/>
+  <text x="648" y="560" font-family="'IBM Plex Mono',monospace" font-size="7.5" fill="#3a6b3a">vector search</text>
+
+  <!-- ════════════════════════════════════════════
+       LEGEND
+  ════════════════════════════════════════════ -->
+  <rect x="12" y="840" width="934" height="0" rx="0" fill="none"/>
+</svg>
+
+<!-- Legend strip -->
+<div style="max-width:960px;margin:20px auto 0;display:flex;flex-wrap:wrap;gap:18px;padding:14px 0;border-top:1px solid #d8d2c8;">
+  <div style="display:flex;align-items:center;gap:7px;">
+    <svg width="36" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#2a4a7f" stroke-width="1.5" marker-end="url(#arr-blue-l)"/></svg>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a736a;">User / auth flow</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div style="width:36px;height:1px;background:#b5622a;"></div>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a736a;">LLM call / response</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div style="width:36px;height:1px;background:#3a6b3a;"></div>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a736a;">Database query</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div style="width:36px;height:1px;background:#0e76a8;border-top:1px dashed #0e76a8;"></div>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a736a;">Ingestion (one-time)</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div style="width:36px;height:1px;background:#6366f1;border-top:1px dashed #6366f1;"></div>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a736a;">Observability (Sentry)</span>
+  </div>
+</div>
+
+<!-- Component Reference -->
+<div class="section-heading">Component Reference</div>
+<table class="annot-table">
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Service / Tech</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Frontend</td>
+      <td>Next.js · Vercel</td>
+      <td>React/TypeScript app deployed on Vercel edge. Occupation search UI, results rendering, follow-up input. Auth.js handles GitHub OAuth session. Sentry Browser SDK for JS errors and Web Vitals.</td>
+    </tr>
+    <tr>
+      <td>Auth</td>
+      <td>GitHub OAuth · Auth.js</td>
+      <td>read:user scope only — GitHub username is the identity token. No email, no repo access. JWT session stored client-side. Vercel edge middleware handles IP-level rate limiting before requests reach the app.</td>
+    </tr>
+    <tr>
+      <td>API Server</td>
+      <td>FastAPI · Python · Railway</td>
+      <td>REST API: validates JWT, checks Upstash rate limit, fetches structured data from Supabase, runs vector search, calls Claude, returns synthesized response. Sentry Python SDK tracks endpoint latency and errors. Hobby plan ~$10–15/mo.</td>
+    </tr>
+    <tr>
+      <td>Rate Limiting</td>
+      <td>Upstash Redis</td>
+      <td>Per-user query counters keyed by GitHub user ID. TTL resets hourly. FastAPI returns 429 when limit exceeded. Serverless Redis — no persistent connection overhead. Free tier sufficient at demo traffic.</td>
+    </tr>
+    <tr>
+      <td>LLM</td>
+      <td>Anthropic Claude Sonnet</td>
+      <td>Receives structured context (SOC data, Pew score, retrieved research chunks) and returns synthesized prose with inline citation markers. Tool call pattern: Claude decides whether to query structured data or vector store. Called only on cache miss.</td>
+    </tr>
+    <tr>
+      <td>Primary DB</td>
+      <td>Supabase · Postgres</td>
+      <td>Stores full SOC taxonomy (4 levels), occupation_geo_estimate, occupation_ai_exposure, occupation_projection, occupation_task, research_source. Written by ingestion scripts, read by FastAPI. Supabase free tier: 500MB, sufficient for seeded BLS/Pew/O*NET data.</td>
+    </tr>
+    <tr>
+      <td>Vector Store</td>
+      <td>Supabase · pgvector</td>
+      <td>research_chunk table: chunked research text (~500 tokens, 100-token overlap) with 1024-dim vectors from Voyage AI voyage-3 model. Cosine similarity search at query time. Same Supabase instance as structured DB — no separate vector DB needed at this scale.</td>
+    </tr>
+    <tr>
+      <td>Embeddings</td>
+      <td>Voyage AI · voyage-3</td>
+      <td>Called by ingestion scripts only — not at query time. Converts research text chunks to 1024-dim float vectors for pgvector storage. Free tier available for low volume. Voyage-3 chosen for strong performance on retrieval tasks.</td>
+    </tr>
+    <tr>
+      <td>Observability</td>
+      <td>Sentry</td>
+      <td>Single dashboard for frontend + backend. Browser SDK captures JS errors and Web Vitals from Vercel. Python SDK on Railway captures endpoint latency, Claude API call duration, rate limit hit rate, and unhandled exceptions. Free tier covers one project.</td>
+    </tr>
+    <tr>
+      <td>Occupation Data</td>
+      <td>BLS OEWS 2024 + OOH</td>
+      <td>Pre-loaded CSVs: wages (p10/p25/median/p75/p90), employment counts, 10-year projections, growth categories. Seeded into Postgres at deploy time via ingestion scripts. National + state + metro geo levels.</td>
+    </tr>
+    <tr>
+      <td>AI Exposure + Tasks</td>
+      <td>Pew Research 2023 · O*NET</td>
+      <td>Pew AI exposure scores (0–1) for 800+ occupations and per-task automation classifications. O*NET task descriptions and importance scores. Pre-loaded alongside BLS data. Joined by SOC code at query time.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Request Flow -->
+<div class="section-heading">Typical Request Flow</div>
+<table class="annot-table">
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Actor</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1 · Auth</td>
+      <td>Browser → GitHub</td>
+      <td>User clicks "Continue with GitHub." OAuth redirects to GitHub, returns authorization code. Auth.js exchanges for access token, reads username (read:user scope), persists JWT session cookie.</td>
+    </tr>
+    <tr>
+      <td>2 · Search</td>
+      <td>Browser → Vercel</td>
+      <td>User types occupation. Frontend queries /autocomplete with partial text. Vercel edge middleware checks IP rate limit. FastAPI queries soc_detailed_occupation for matching rows, returns SOC codes + labels.</td>
+    </tr>
+    <tr>
+      <td>3 · Analyze</td>
+      <td>Vercel → Railway</td>
+      <td>On selection, frontend POSTs {soc_detailed_occupation_id, label} to /analyze. FastAPI validates JWT, extracts GitHub user ID.</td>
+    </tr>
+    <tr>
+      <td>4 · Rate check</td>
+      <td>Railway → Upstash</td>
+      <td>FastAPI increments per-user counter in Upstash. If limit exceeded, returns 429 immediately. Otherwise continues.</td>
+    </tr>
+    <tr>
+      <td>5a · Data fetch</td>
+      <td>Railway → Supabase</td>
+      <td>FastAPI queries: occupation_geo_estimate (national wages), occupation_ai_exposure (Pew score + tier), occupation_projection (10-year outlook), occupation_task (automatable tasks). Single round-trip with joins.</td>
+    </tr>
+    <tr>
+      <td>5b · Vector search</td>
+      <td>Railway → Supabase pgvector</td>
+      <td>User's occupation label embedded via Voyage AI (or a cached query embedding). Top-k research_chunk rows retrieved by cosine similarity. research_source joined for citation metadata.</td>
+    </tr>
+    <tr>
+      <td>6 · Synthesis</td>
+      <td>Railway → Claude</td>
+      <td>Structured data + retrieved chunks assembled into a tool-call prompt. Claude synthesizes prose with inline citation markers [1], [2], [3]. Response streamed back to FastAPI.</td>
+    </tr>
+    <tr>
+      <td>7 · Render</td>
+      <td>Vercel → Browser</td>
+      <td>Results page renders: LLM prose with citation badges, AI exposure gauge (0–1 score + tier), wage distribution chart (p10–p90), employment projection, follow-up input, suggested chips.</td>
+    </tr>
+    <tr>
+      <td>8 · Follow-up</td>
+      <td>Browser → Railway → Claude</td>
+      <td>Follow-up questions sent with prior context + SOC data. Claude responds conversationally. Rate limit checked per follow-up. Not cached — per-session.</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

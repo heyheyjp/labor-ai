@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Labor &amp; AI — Data Ingest &amp; Query Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper:        #f5f2ec;
+    --paper2:       #ece8df;
+    --paper3:       #e2ddd3;
+    --rule:         #d8d2c8;
+    --rule2:        #bfb8ad;
+    --ink:          #0e0f11;
+    --text:         #1a1b1e;
+    --muted:        #7a736a;
+    --faint:        #b0a99f;
+    --accent:       #b5622a;
+    --accent-light: #f7ece2;
+    --accent-dark:  #8c3f18;
+    --green:        #2e6b4a;
+    --green-light:  #eaf3ee;
+    --green-mid:    #c2dccb;
+    --amber:        #8a5a00;
+    --amber-light:  #fdf3dc;
+    --amber-mid:    #e8d090;
+    --purple:       #5a3a80;
+    --purple-light: #f2eef8;
+    --purple-mid:   #c8b8e0;
+    --red:          #9b2020;
+    --red-light:    #fdf0f0;
+    --red-mid:      #e0b8b8;
+    --blue:         #1e4a80;
+    --blue-light:   #eef3fa;
+    --blue-mid:     #b8cce0;
+    --serif:        'Source Serif 4', Georgia, serif;
+    --sans:         'IBM Plex Sans', system-ui, sans-serif;
+    --mono:         'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.65;
+    padding: 52px 32px 100px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    max-width: 960px; margin: 0 auto 52px;
+    border-bottom: 1px solid var(--rule); padding-bottom: 28px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+  }
+  .page-header .label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  }
+  .page-header h1 {
+    font-family: var(--serif); font-size: 30px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--ink); margin-bottom: 12px; line-height: 1.15;
+  }
+  .page-header p { font-size: 13px; color: var(--muted); max-width: 580px; line-height: 1.8; }
+  .page-header-meta {
+    font-family: var(--mono); font-size: 9.5px; color: var(--faint);
+    text-align: right; line-height: 1.9; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    max-width: 960px; margin: 0 auto 52px;
+    background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 22px 26px;
+  }
+  .toc-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 18px;
+  }
+  .toc-section { margin-bottom: 14px; }
+  .toc-section:last-child { margin-bottom: 0; }
+  .toc-section-label {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+  }
+  .toc-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .toc-list a {
+    font-family: var(--mono); font-size: 11.5px; color: var(--accent); text-decoration: none;
+  }
+  .toc-list a:hover { color: var(--accent-dark); text-decoration: underline; }
+
+  /* ── SECTION CHROME ── */
+  .group-label {
+    max-width: 960px; margin: 0 auto 28px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--amber);
+    padding-bottom: 10px; border-bottom: 1px solid var(--amber-mid);
+  }
+  .divider {
+    max-width: 960px; margin: 0 auto 64px;
+    border: none; border-top: 1px solid var(--rule);
+  }
+
+  /* ── SECTION ── */
+  .section { max-width: 960px; margin: 0 auto 64px; }
+  .section-eyebrow {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--serif); font-size: 24px; font-weight: 600;
+    color: var(--ink); letter-spacing: -0.01em; margin-bottom: 6px;
+  }
+  .section-rule { border: none; border-top: 1px solid var(--rule2); margin-bottom: 22px; }
+  .section-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.9;
+    margin-bottom: 24px; max-width: 720px;
+  }
+
+  /* ── SUBSECTION ── */
+  .subsection { margin-bottom: 32px; }
+  .subsection-title {
+    font-family: var(--serif); font-size: 17px; font-weight: 600;
+    color: var(--ink); margin-bottom: 12px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* ── CARDS ── */
+  .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  .card {
+    background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px;
+  }
+  .card-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 14px; font-weight: 500;
+  }
+  .card ul { list-style: none; }
+  .card li {
+    font-size: 12.5px; color: var(--text); padding: 5px 0 5px 16px;
+    position: relative; border-bottom: 1px solid var(--rule); line-height: 1.7;
+  }
+  .card li:last-child { border-bottom: none; }
+  .card li::before { content: '·'; position: absolute; left: 2px; color: var(--faint); font-size: 16px; line-height: 1.3; }
+  .card li code { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .card p { font-size: 12.5px; color: var(--muted); line-height: 1.8; }
+
+  .card-green {
+    background: var(--green-light); border: 1px solid var(--green-mid); border-radius: 6px; padding: 20px 22px;
+  }
+  .card-green .card-title { color: var(--green); }
+  .card-green li { color: #2a5a3a; border-bottom-color: var(--green-mid); }
+  .card-green li:last-child { border-bottom: none; }
+  .card-green li::before { content: '→'; color: var(--green); font-size: 12px; line-height: 1.65; left: 0; }
+  .card-green li code { color: var(--green); }
+
+  .card-amber {
+    background: var(--amber-light); border: 1px solid var(--amber-mid); border-radius: 6px; padding: 20px 22px;
+  }
+  .card-amber .card-title { color: var(--amber); }
+  .card-amber li { color: #5a3a00; border-bottom-color: var(--amber-mid); }
+  .card-amber li:last-child { border-bottom: none; }
+  .card-amber li::before { content: '!'; color: var(--amber); font-size: 11px; font-weight: 700; line-height: 1.7; left: 1px; }
+  .card-amber p { font-size: 12.5px; color: #5a3a00; line-height: 1.8; }
+
+  .card-blue {
+    background: var(--blue-light); border: 1px solid var(--blue-mid); border-radius: 6px; padding: 20px 22px;
+  }
+  .card-blue .card-title { color: var(--blue); }
+  .card-blue p { font-size: 12.5px; color: #1a3a5a; line-height: 1.8; }
+  .card-blue li { color: #1a3a5a; border-bottom-color: var(--blue-mid); }
+  .card-blue li:last-child { border-bottom: none; }
+  .card-blue li::before { content: '→'; color: var(--blue); font-size: 12px; line-height: 1.65; left: 0; }
+  .card-blue li code { font-family: var(--mono); font-size: 11px; color: var(--blue); }
+
+  /* ── CODE BLOCKS ── */
+  .code-wrap { border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+  .code-label {
+    background: var(--paper2); border-bottom: 1px solid var(--rule);
+    padding: 7px 14px; font-family: var(--mono); font-size: 9px;
+    color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .code-block {
+    background: var(--ink); color: #e2e8f0;
+    padding: 18px 20px; font-family: var(--mono); font-size: 12px;
+    line-height: 1.8; overflow-x: auto; white-space: pre;
+  }
+  .code-block .k  { color: #93c5fd; }   /* keyword / field name */
+  .code-block .v  { color: #86efac; }   /* string value */
+  .code-block .n  { color: #fde68a; }   /* number */
+  .code-block .c  { color: #64748b; font-style: italic; }  /* comment */
+  .code-block .t  { color: #f9a8d4; }   /* type / operator */
+  .code-block .fn { color: #c4b5fd; }   /* function name */
+  .code-block .p  { color: #e2e8f0; }   /* punctuation */
+
+  /* ── PIPELINE FLOW ── */
+  .flow {
+    max-width: 960px; margin: 0 auto 28px;
+    display: flex; align-items: stretch; gap: 0;
+    background: #fff; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden;
+  }
+  .flow-step {
+    flex: 1; padding: 18px 16px; border-right: 1px solid var(--rule);
+    position: relative;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step-num {
+    font-family: var(--mono); font-size: 9px; color: var(--faint);
+    letter-spacing: 0.12em; margin-bottom: 6px;
+  }
+  .flow-step-title {
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    color: var(--ink); margin-bottom: 6px; line-height: 1.3;
+  }
+  .flow-step-desc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  .flow-step-tag {
+    display: inline-block; margin-top: 8px;
+    font-family: var(--mono); font-size: 8px; padding: 1px 6px; border-radius: 3px;
+    font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .tag-once  { background: var(--purple-light); color: var(--purple); border: 1px solid var(--purple-mid); }
+  .tag-query { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+  .tag-ext   { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
+
+  /* ── FIELD TABLE ── */
+  .field-table {
+    width: 100%; border-collapse: collapse;
+    border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-bottom: 16px;
+  }
+  .field-table thead tr { background: var(--paper2); }
+  .field-table thead th {
+    padding: 9px 13px; text-align: left;
+    font-family: var(--mono); font-size: 8.5px; color: var(--muted);
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+    border-bottom: 1px solid var(--rule);
+  }
+  .field-table tbody tr { background: #fff; border-bottom: 1px solid var(--rule); }
+  .field-table tbody tr:last-child { border-bottom: none; }
+  .field-table tbody tr:hover { background: var(--paper); }
+  .field-table td { padding: 10px 13px; vertical-align: top; font-size: 12.5px; line-height: 1.65; }
+  .field-table td:first-child { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .field-table td:nth-child(2) { font-family: var(--mono); font-size: 11px; color: var(--green); white-space: nowrap; }
+  .field-table td:last-child { color: var(--muted); }
+
+  code { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
+
+  /* ── DATA OVERVIEW ── */
+  .data-sources {
+    max-width: 960px; margin: 0 auto 52px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .ds-card {
+    background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 18px 16px;
+  }
+  .ds-name {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink); margin-bottom: 4px;
+  }
+  .ds-type {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 10px;
+  }
+  .ds-card p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .ds-target {
+    margin-top: 10px; font-family: var(--mono); font-size: 10px; color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="label">Labor &amp; AI · Technical Reference</div>
+    <h1>Data Ingest &amp; Query</h1>
+    <p>How data enters the system, how it is stored and indexed, and how it is retrieved at query time to assemble context for Claude. Covers all four ingestion sources and both query paths: structured data fetch and vector similarity search.</p>
+  </div>
+  <div class="page-header-meta">v1 · March 2026<br>4 sources · 2 query paths</div>
+</div>
+
+<!-- DATA SOURCES OVERVIEW -->
+<div class="data-sources">
+  <div class="ds-card">
+    <div class="ds-name">BLS OEWS 2024</div>
+    <div class="ds-type">Structured · xlsx/csv</div>
+    <p>Wage distributions and employment counts by occupation and geography. National, state, and metro estimates.</p>
+    <div class="ds-target">→ occupation_geo_estimate</div>
+  </div>
+  <div class="ds-card">
+    <div class="ds-name">BLS OOH Projections</div>
+    <div class="ds-type">Structured · csv/html</div>
+    <p>10-year employment projections (2023–2033) by occupation. Numeric change, percent change, and growth category.</p>
+    <div class="ds-target">→ occupation_projection</div>
+  </div>
+  <div class="ds-card">
+    <div class="ds-name">Pew AI Exposure 2023</div>
+    <div class="ds-type">Structured · csv</div>
+    <p>AI exposure scores (0–1) and automatable task fractions for ~800 occupations, keyed by SOC code.</p>
+    <div class="ds-target">→ occupation_ai_exposure</div>
+  </div>
+  <div class="ds-card">
+    <div class="ds-name">Research corpus</div>
+    <div class="ds-type">Unstructured · pdf/url</div>
+    <p>Curated reports and articles on AI and labor markets. Chunked, embedded via Voyage AI, and stored as vectors in pgvector.</p>
+    <div class="ds-target">→ research_chunk</div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-section">
+    <div class="toc-section-label">Ingestion</div>
+    <ul class="toc-list">
+      <li><a href="#soc-taxonomy">SOC taxonomy seed</a></li>
+      <li><a href="#bls-oews">BLS OEWS wages</a></li>
+      <li><a href="#bls-ooh">BLS OOH projections</a></li>
+      <li><a href="#pew">Pew AI exposure scores</a></li>
+      <li><a href="#research-corpus">Research corpus &amp; embeddings</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Query time</div>
+    <ul class="toc-list">
+      <li><a href="#structured-fetch">Structured data fetch</a></li>
+      <li><a href="#vector-search">Vector similarity search</a></li>
+      <li><a href="#context-assembly">Context assembly</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
+    <div class="toc-section-label">Reference</div>
+    <ul class="toc-list">
+      <li><a href="#voyage">Voyage AI integration</a></li>
+      <li><a href="#soc-matching">SOC code matching</a></li>
+      <li><a href="#suppression">BLS suppression handling</a></li>
+    </ul>
+  </div>
+</div>
+
+<hr class="divider"/>
+<div class="group-label">Ingestion</div>
+
+<!-- SOC TAXONOMY -->
+<div class="section" id="soc-taxonomy">
+  <div class="section-eyebrow">Ingestion · Script 0</div>
+  <div class="section-title">SOC taxonomy seed</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">The Standard Occupational Classification (SOC) hierarchy is the backbone of the data model. All operational tables FK into <code>soc_detailed_occupation</code>. The taxonomy is loaded once before any other ingestion script runs, in strict insertion order from top to bottom of the hierarchy so FK constraints are satisfied.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Source &amp; structure</div>
+      <ul>
+        <li>Source: BLS SOC 2018 classification files (CSV downloads from bls.gov)</li>
+        <li>Four levels: major group (23) → minor group (~100) → broad occupation (~450) → detailed occupation (~830)</li>
+        <li>Each level has a code string and a title. Codes follow a structured pattern: <code>15-0000</code> (major), <code>15-1200</code> (minor), <code>15-1250</code> (broad), <code>15-1252</code> (detailed)</li>
+        <li><code>revision_year</code> set to <code>2018</code> throughout. Future SOC revisions can coexist in the same tables via the UNIQUE(code, revision_year) constraint.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Insertion order</div>
+      <ul>
+        <li><strong>1.</strong> <code>soc_major_group</code> — 23 rows, no FK dependencies</li>
+        <li><strong>2.</strong> <code>soc_minor_group</code> — FK → <code>soc_major_group</code></li>
+        <li><strong>3.</strong> <code>soc_broad_occupation</code> — FK → <code>soc_minor_group</code></li>
+        <li><strong>4.</strong> <code>soc_detailed_occupation</code> — FK → <code>soc_broad_occupation</code></li>
+        <li>All subsequent ingestion scripts reference <code>soc_detailed_occupation.id</code> (UUID) by looking up <code>detailed_occupation_code</code>. The UUID is the operational join key throughout.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-label">Core seed logic (Python)</div>
+    <div class="code-block"><span class="fn">def</span> <span class="fn">seed_soc_taxonomy</span>(session: Session) -> <span class="k">None</span>:
+    <span class="c"># Load each level from BLS CSV files</span>
+    <span class="c"># INSERT ... ON CONFLICT DO NOTHING for idempotency</span>
+    <span class="k">for</span> row <span class="k">in</span> <span class="fn">parse_major_groups</span>(<span class="v">"soc_2018_major_groups.csv"</span>):
+        session.<span class="fn">execute</span>(
+            <span class="fn">insert</span>(SocMajorGroup)
+            .<span class="fn">values</span>(major_group_code=row[<span class="v">"code"</span>], major_group_name=row[<span class="v">"title"</span>], revision_year=<span class="n">2018</span>)
+            .<span class="fn">on_conflict_do_nothing</span>()
+        )
+    session.<span class="fn">commit</span>()
+    <span class="c"># Repeat for minor, broad, detailed — in that order</span>
+
+<span class="c"># Look up a soc_detailed_occupation UUID by code string</span>
+<span class="c"># Used by all downstream ingestion scripts</span>
+<span class="fn">def</span> <span class="fn">get_occupation_id</span>(session: Session, code: <span class="k">str</span>) -> UUID | <span class="k">None</span>:
+    result = session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(SocDetailedOccupation.id)
+        .<span class="fn">where</span>(SocDetailedOccupation.detailed_occupation_code == <span class="fn">normalize_soc_code</span>(code))
+        .<span class="fn">where</span>(SocDetailedOccupation.revision_year == <span class="n">2018</span>)
+    ).<span class="fn">scalar_one_or_none</span>()
+    <span class="k">return</span> result</div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- BLS OEWS -->
+<div class="section" id="bls-oews">
+  <div class="section-eyebrow">Ingestion · Script 1</div>
+  <div class="section-title">BLS OEWS wages</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">The Occupational Employment and Wage Statistics (OEWS) survey provides wage distributions and employment counts by occupation and geography. The 2024 release covers national estimates, 50 states + DC, and ~600 metropolitan areas. All three geo levels are loaded into a single table keyed by <code>(soc_detailed_occupation_id, geo_type, geo_code, survey_year)</code>.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Source files</div>
+      <ul>
+        <li><code>oews_national_M2024_dl.xlsx</code> — national estimates, one row per occupation</li>
+        <li><code>oews_state_M2024_dl.xlsx</code> — state-level estimates, one row per occupation × state</li>
+        <li><code>oews_metro_M2024_dl.xlsx</code> — MSA-level estimates, one row per occupation × metro area</li>
+        <li>All three files share the same column schema. Load national first, then state, then metro.</li>
+        <li>Source columns relevant to the model: <code>OCC_CODE</code>, <code>OCC_TITLE</code>, <code>TOT_EMP</code>, <code>A_MEAN</code>, <code>A_MEDIAN</code>, <code>A_PCT10</code>, <code>A_PCT25</code>, <code>A_PCT75</code>, <code>A_PCT90</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Target table fields</div>
+      <ul>
+        <li><code>soc_detailed_occupation_id</code> — looked up by normalized <code>OCC_CODE</code></li>
+        <li><code>geo_type</code> — <code>'national'</code>, <code>'state'</code>, or <code>'metro'</code></li>
+        <li><code>geo_code</code> — FIPS state code or MSA code; <code>'US'</code> for national</li>
+        <li><code>geo_name</code> — human-readable name (e.g. <code>'California'</code>, <code>'San Francisco-Oakland-Hayward, CA'</code>)</li>
+        <li><code>est_worker_count</code> — from <code>TOT_EMP</code></li>
+        <li><code>annual_mean_wage_usd</code>, <code>annual_median_wage_usd</code> — from <code>A_MEAN</code>, <code>A_MEDIAN</code></li>
+        <li><code>annual_wage_p10/p25/p75/p90</code> — from corresponding <code>A_PCT*</code> columns</li>
+        <li><code>survey_year</code> — <code>2024</code> for this load</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="suppression">
+    <div class="subsection-title">BLS suppression handling</div>
+    <p class="section-desc" style="margin-bottom:14px;">BLS suppresses estimates when the sample is too small to produce a reliable figure, or when publication would allow identification of a specific employer. Suppressed cells are indicated by sentinel strings rather than empty values. All sentinels must be converted to <code>NULL</code> before insert — a missed sentinel stored as a string in a numeric column will cause a type error or, worse, silently succeed if the column is text.</p>
+
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-title">Known suppression sentinel values</div>
+        <ul>
+          <li><code>*</code> — estimate not released (most common)</li>
+          <li><code>#</code> — wage exceeded the top-coded value ($239,200)</li>
+          <li><code>**</code> — employment estimate not released</li>
+          <li><code>†</code> — data not available for this occupation/area</li>
+          <li>Empty string <code>""</code> — treated as suppressed in some file versions</li>
+        </ul>
+      </div>
+      <div class="code-wrap" style="margin-bottom:0;">
+        <div class="code-label">Suppression normalization</div>
+        <div class="code-block"><span class="t">SUPPRESSED</span> = {<span class="v">"*"</span>, <span class="v">"**"</span>, <span class="v">"#"</span>, <span class="v">"†"</span>, <span class="v">""</span>}
+
+<span class="fn">def</span> <span class="fn">parse_wage</span>(raw: <span class="k">str</span>) -> <span class="k">float</span> | <span class="k">None</span>:
+    <span class="k">if</span> raw.<span class="fn">strip</span>() <span class="k">in</span> SUPPRESSED:
+        <span class="k">return None</span>
+    <span class="k">return</span> <span class="fn">float</span>(raw.<span class="fn">replace</span>(<span class="v">","</span>, <span class="v">""</span>))</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-label">Core load logic (national, abbreviated)</div>
+    <div class="code-block"><span class="fn">def</span> <span class="fn">load_oews_national</span>(session: Session, filepath: <span class="k">str</span>) -> LoadResult:
+    df = pd.<span class="fn">read_excel</span>(filepath, dtype=<span class="k">str</span>)  <span class="c"># read all as str to catch sentinels</span>
+    inserted = skipped = failed = <span class="n">0</span>
+
+    <span class="k">for</span> _, row <span class="k">in</span> df.<span class="fn">iterrows</span>():
+        occupation_id = <span class="fn">get_occupation_id</span>(session, row[<span class="v">"OCC_CODE"</span>])
+        <span class="k">if not</span> occupation_id:
+            failed += <span class="n">1</span>
+            <span class="fn">log_soc_miss</span>(row[<span class="v">"OCC_CODE"</span>])
+            <span class="k">continue</span>
+
+        result = session.<span class="fn">execute</span>(
+            <span class="fn">insert</span>(OccupationGeoEstimate).<span class="fn">values</span>(
+                soc_detailed_occupation_id = occupation_id,
+                geo_type                   = <span class="v">"national"</span>,
+                geo_code                   = <span class="v">"US"</span>,
+                geo_name                   = <span class="v">"United States"</span>,
+                survey_year                = <span class="n">2024</span>,
+                est_worker_count           = <span class="fn">parse_int</span>(row[<span class="v">"TOT_EMP"</span>]),
+                annual_mean_wage_usd       = <span class="fn">parse_wage</span>(row[<span class="v">"A_MEAN"</span>]),
+                annual_median_wage_usd     = <span class="fn">parse_wage</span>(row[<span class="v">"A_MEDIAN"</span>]),
+                annual_wage_p10            = <span class="fn">parse_wage</span>(row[<span class="v">"A_PCT10"</span>]),
+                annual_wage_p25            = <span class="fn">parse_wage</span>(row[<span class="v">"A_PCT25"</span>]),
+                annual_wage_p75            = <span class="fn">parse_wage</span>(row[<span class="v">"A_PCT75"</span>]),
+                annual_wage_p90            = <span class="fn">parse_wage</span>(row[<span class="v">"A_PCT90"</span>]),
+            ).<span class="fn">on_conflict_do_nothing</span>()
+        )
+        inserted += result.rowcount
+    session.<span class="fn">commit</span>()
+    <span class="k">return</span> LoadResult(inserted, skipped, failed)</div>
+  </div>
+
+  <div class="card-amber" style="margin-top:0;">
+    <div class="card-title">V1 scope: national estimates only</div>
+    <p>The frontend displays national wage distributions only. State and metro files are loaded into the database for completeness and future use, but the application query always filters on <code>geo_type = 'national'</code>. Loading all three geo levels adds ~42,000 rows but costs nothing in query performance since the national filter is indexed.</p>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- BLS OOH -->
+<div class="section" id="bls-ooh">
+  <div class="section-eyebrow">Ingestion · Script 2</div>
+  <div class="section-title">BLS OOH projections</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">The BLS Employment Projections program publishes 10-year outlook data for detailed occupations. The 2023–2033 release is the current dataset. Unlike the OEWS files, the projections table is not exhaustive — not every detailed occupation has a projection, and some projections cover a broader occupation grouping rather than a single SOC code.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Source &amp; fields</div>
+      <ul>
+        <li>Source: BLS Employment Projections 2023–2033 table (CSV download from bls.gov/emp)</li>
+        <li><code>OCC_CODE</code> — SOC code. Requires the same normalization as OEWS.</li>
+        <li><code>EMPL_BASE</code> — base year (2023) employment in thousands</li>
+        <li><code>EMPL_PROJ</code> — projected year (2033) employment in thousands</li>
+        <li><code>EMPL_CHNG_NUMER</code> — numeric change (thousands)</li>
+        <li><code>EMPL_CHNG_PCT</code> — percent change</li>
+        <li><code>CATEG_CHANGE</code> — BLS categorical label: "Much faster than average", "Faster than average", "As fast as average", "Slower than average", "Little or no change", "Decline"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Target table fields</div>
+      <ul>
+        <li><code>soc_detailed_occupation_id</code> — FK to <code>soc_detailed_occupation</code></li>
+        <li><code>base_year</code> — <code>2023</code></li>
+        <li><code>projection_year</code> — <code>2033</code></li>
+        <li><code>base_employment</code> — raw count (multiply BLS thousands by 1,000)</li>
+        <li><code>projected_employment</code> — raw count</li>
+        <li><code>change_abs</code> — absolute change in headcount</li>
+        <li><code>change_pct</code> — percent change as a float (e.g. <code>25.9</code>)</li>
+        <li><code>growth_category</code> — BLS categorical string stored verbatim</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-amber">
+    <div class="card-title">Coverage gap</div>
+    <p>Not all ~830 detailed occupations have projections. The BLS sometimes groups several detailed occupations under a single projected category, or excludes occupations with insufficient data. The <code>occupation_projection</code> table will have ~700 rows — ~130 occupations will have no projection data. The application and Claude's system prompt must handle <code>NULL</code> projection gracefully rather than treating absence as an error.</p>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- PEW -->
+<div class="section" id="pew">
+  <div class="section-eyebrow">Ingestion · Script 3</div>
+  <div class="section-title">Pew AI exposure scores</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">The Pew Research Center's 2023 AI exposure study scored ~800 occupations on a 0–1 scale based on the degree to which AI could perform or assist with the tasks comprising each job. It also identified which specific tasks within each occupation are automatable. This is the primary AI risk signal in the system.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Source &amp; fields</div>
+      <ul>
+        <li>Source: Pew Research Center dataset download (CSV). Available via the report's methodology appendix.</li>
+        <li>Keyed by SOC 2018 code — matches <code>soc_detailed_occupation.revision_year = 2018</code> directly</li>
+        <li><code>ai_exposure_score</code> — float 0–1. Higher = more exposed.</li>
+        <li><code>pct_tasks_automatable</code> — fraction of job tasks Pew classified as AI-automatable</li>
+        <li>No per-task breakdown in the main dataset — task-level data comes from O*NET (out of scope for initial V1 load)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Tier derivation</div>
+      <ul>
+        <li><code>exposure_tier</code> is derived at load time from the score, not stored in the Pew source</li>
+        <li><code>high</code> — score ≥ 0.70</li>
+        <li><code>medium</code> — score 0.40–0.69</li>
+        <li><code>low</code> — score &lt; 0.40</li>
+        <li>Thresholds are based on Pew's own methodology notes. Confirm against the report before finalizing.</li>
+        <li><code>exposure_score_source</code> field set to <code>'pew_2023'</code> — allows future sources (e.g. a 2025 update) to coexist via the UNIQUE(occupation_id, source) constraint</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-label">Load logic</div>
+    <div class="code-block"><span class="fn">def</span> <span class="fn">derive_tier</span>(score: <span class="k">float</span>) -> <span class="k">str</span>:
+    <span class="k">if</span> score >= <span class="n">0.70</span>: <span class="k">return</span> <span class="v">"high"</span>
+    <span class="k">if</span> score >= <span class="n">0.40</span>: <span class="k">return</span> <span class="v">"medium"</span>
+    <span class="k">return</span> <span class="v">"low"</span>
+
+<span class="fn">def</span> <span class="fn">load_pew_exposure</span>(session: Session, filepath: <span class="k">str</span>) -> LoadResult:
+    df = pd.<span class="fn">read_csv</span>(filepath)
+
+    <span class="k">for</span> _, row <span class="k">in</span> df.<span class="fn">iterrows</span>():
+        occupation_id = <span class="fn">get_occupation_id</span>(session, row[<span class="v">"soc_code"</span>])
+        <span class="k">if not</span> occupation_id:
+            <span class="k">continue</span>
+
+        session.<span class="fn">execute</span>(
+            <span class="fn">insert</span>(OccupationAiExposure).<span class="fn">values</span>(
+                soc_detailed_occupation_id = occupation_id,
+                exposure_score             = <span class="k">float</span>(row[<span class="v">"ai_exposure_score"</span>]),
+                exposure_tier              = <span class="fn">derive_tier</span>(<span class="k">float</span>(row[<span class="v">"ai_exposure_score"</span>])),
+                tasks_automatable_pct      = <span class="k">float</span>(row[<span class="v">"pct_tasks_automatable"</span>]),
+                exposure_score_source      = <span class="v">"pew_2023"</span>,
+            ).<span class="fn">on_conflict_do_nothing</span>()
+        )
+    session.<span class="fn">commit</span>()</div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- RESEARCH CORPUS -->
+<div class="section" id="research-corpus">
+  <div class="section-eyebrow">Ingestion · Script 4</div>
+  <div class="section-title">Research corpus &amp; embeddings</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">The research corpus is the qualitative layer of the system — the body of reports, studies, and articles from which Claude draws cited evidence. Each document is chunked into overlapping passages, each passage is embedded via Voyage AI into a 1,024-dimensional vector, and both the text and the vector are stored in Postgres. This enables semantic similarity search at query time: given an occupation, retrieve the passages most relevant to it.</p>
+
+  <div class="subsection">
+    <div class="subsection-title">Document preparation</div>
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-title">Corpus contents (initial)</div>
+        <ul>
+          <li>WEF Future of Jobs 2025</li>
+          <li>Pew AI and the Future of Work 2023</li>
+          <li>Goldman Sachs AI Labor Market Report 2023</li>
+          <li>McKinsey The Future of Work After COVID-19</li>
+          <li>BLS Occupational Outlook Handbook (selected pages)</li>
+          <li>MIT Work of the Future reports</li>
+          <li>Additional sourced PDFs — TBD at build time</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Chunking strategy</div>
+        <ul>
+          <li>Target chunk size: ~500 tokens. At this size, each chunk is semantically coherent — a paragraph or two — without being so long that it dilutes the embedding signal.</li>
+          <li>Overlap: ~50 tokens between adjacent chunks. Prevents a sentence that straddles a chunk boundary from being effectively invisible to retrieval.</li>
+          <li>Chunk boundaries respect sentence endings — do not split mid-sentence.</li>
+          <li>Title and source metadata prepended to each chunk text before embedding, so the vector reflects context not just content.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Embedding pipeline</div>
+
+    <!-- PIPELINE FLOW -->
+    <div class="flow" style="margin-bottom:20px;">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div class="flow-step-title">Extract text</div>
+        <div class="flow-step-desc">Parse PDF or fetch URL. Strip headers, footers, page numbers. Normalize whitespace.</div>
+        <span class="flow-step-tag tag-once">once</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div class="flow-step-title">Chunk</div>
+        <div class="flow-step-desc">Split into ~500 token passages with 50-token overlap. Respect sentence boundaries.</div>
+        <span class="flow-step-tag tag-once">once</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div class="flow-step-title">Insert source</div>
+        <div class="flow-step-desc">Upsert <code>research_source</code> row with URL, title, type, date.</div>
+        <span class="flow-step-tag tag-once">once</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <div class="flow-step-title">Embed batch</div>
+        <div class="flow-step-desc">Send chunks to Voyage AI in batches of 100. Receive 1,024-float vectors.</div>
+        <span class="flow-step-tag tag-ext">voyage api</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <div class="flow-step-title">Store chunks</div>
+        <div class="flow-step-desc">Insert <code>research_chunk</code> rows with text + vector. Skip if already embedded.</div>
+        <span class="flow-step-tag tag-once">once</span>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Embedding pipeline (abbreviated)</div>
+      <div class="code-block"><span class="k">import</span> voyageai
+
+voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYAGE_API_KEY from environment</span>
+
+<span class="fn">def</span> <span class="fn">embed_and_store</span>(
+    session: Session,
+    source_id: UUID,
+    chunks: <span class="k">list</span>[<span class="k">str</span>],
+    batch_size: <span class="k">int</span> = <span class="n">100</span>
+) -> <span class="k">None</span>:
+    <span class="k">for</span> i <span class="k">in</span> <span class="fn">range</span>(<span class="n">0</span>, <span class="fn">len</span>(chunks), batch_size):
+        batch = chunks[i : i + batch_size]
+
+        <span class="c"># Voyage embed call — model="voyage-3" returns 1024-dim vectors</span>
+        result = voyage.<span class="fn">embed</span>(batch, model=<span class="v">"voyage-3"</span>)
+        vectors = result.embeddings  <span class="c"># list[list[float]], len == len(batch)</span>
+
+        <span class="k">for</span> j, (text, vector) <span class="k">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(batch, vectors)):
+            chunk_index = i + j
+            session.<span class="fn">execute</span>(
+                <span class="fn">insert</span>(ResearchChunk)
+                .<span class="fn">values</span>(
+                    research_source_id = source_id,
+                    chunk_index        = chunk_index,
+                    chunk_text         = text,
+                    embedding          = vector,  <span class="c"># pgvector stores list[float] natively</span>
+                )
+                .<span class="fn">on_conflict_do_nothing</span>()  <span class="c"># idempotent on (source_id, chunk_index)</span>
+            )
+
+        session.<span class="fn">commit</span>()
+        <span class="fn">time.sleep</span>(<span class="n">0.5</span>)  <span class="c"># conservative rate limit buffer</span></div>
+    </div>
+  </div>
+
+  <div class="cols-2">
+    <div class="card">
+      <div class="card-title">research_source row</div>
+      <ul>
+        <li><code>source_url</code> — canonical URL or file path. UNIQUE — deduplication key.</li>
+        <li><code>source_title</code> — human-readable title used in citations</li>
+        <li><code>source_type</code> — <code>'report'</code>, <code>'article'</code>, <code>'government'</code>, etc.</li>
+        <li><code>published_date</code> — date of publication, used in citation display</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">research_chunk row</div>
+      <ul>
+        <li><code>research_source_id</code> — FK to <code>research_source</code></li>
+        <li><code>chunk_index</code> — 0-based position within the document</li>
+        <li><code>chunk_text</code> — the raw passage text, stored verbatim for inclusion in prompts</li>
+        <li><code>embedding</code> — <code>vector(1024)</code>, pgvector type. Cosine similarity index (<code>ivfflat</code>) on this column.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+<div class="group-label">Query time</div>
+
+<!-- STRUCTURED FETCH -->
+<div class="section" id="structured-fetch">
+  <div class="section-eyebrow">Query path 1</div>
+  <div class="section-title">Structured data fetch</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">When a user submits an occupation for analysis, FastAPI executes a single Postgres round-trip that retrieves all structured data needed for the prompt: wages, exposure score, employment projection, and top automatable tasks. This happens before any call to Voyage AI or Claude.</p>
+
+  <div class="code-wrap" style="margin-bottom:16px;">
+    <div class="code-label">Single-round-trip data fetch (SQLAlchemy)</div>
+    <div class="code-block"><span class="fn">async def</span> <span class="fn">fetch_occupation_data</span>(
+    session: AsyncSession,
+    occupation_id: UUID
+) -> OccupationData:
+    <span class="c"># Wages — national only for V1</span>
+    wages = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(OccupationGeoEstimate)
+        .<span class="fn">where</span>(OccupationGeoEstimate.soc_detailed_occupation_id == occupation_id)
+        .<span class="fn">where</span>(OccupationGeoEstimate.geo_type == <span class="v">"national"</span>)
+        .<span class="fn">where</span>(OccupationGeoEstimate.survey_year == <span class="n">2024</span>)
+    ).<span class="fn">scalar_one_or_none</span>()
+
+    <span class="c"># Exposure</span>
+    exposure = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(OccupationAiExposure)
+        .<span class="fn">where</span>(OccupationAiExposure.soc_detailed_occupation_id == occupation_id)
+        .<span class="fn">where</span>(OccupationAiExposure.exposure_score_source == <span class="v">"pew_2023"</span>)
+    ).<span class="fn">scalar_one_or_none</span>()
+
+    <span class="c"># Projection</span>
+    projection = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(OccupationProjection)
+        .<span class="fn">where</span>(OccupationProjection.soc_detailed_occupation_id == occupation_id)
+        .<span class="fn">where</span>(OccupationProjection.base_year == <span class="n">2023</span>)
+    ).<span class="fn">scalar_one_or_none</span>()
+
+    <span class="c"># Top automatable tasks, ordered by importance</span>
+    tasks = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(OccupationTask)
+        .<span class="fn">where</span>(OccupationTask.soc_detailed_occupation_id == occupation_id)
+        .<span class="fn">where</span>(OccupationTask.is_automatable == <span class="k">True</span>)
+        .<span class="fn">order_by</span>(OccupationTask.importance_score.<span class="fn">desc</span>())
+        .<span class="fn">limit</span>(<span class="n">5</span>)
+    ).<span class="fn">scalars</span>().<span class="fn">all</span>()
+
+    <span class="k">return</span> OccupationData(wages=wages, exposure=exposure, projection=projection, tasks=tasks)</div>
+  </div>
+
+  <div class="card-blue">
+    <div class="card-title">NULL handling contract</div>
+    <ul>
+      <li>Any of the four result objects may be <code>None</code> — occupations with no Pew score, no projection data, or suppressed wages are all valid states.</li>
+      <li>The context assembly step (see below) is responsible for formatting <code>None</code> values into prompt text that Claude can reason about gracefully — e.g. <code>"Employment projection: not available for this occupation."</code></li>
+      <li><code>summary_json</code> mirrors these nulls in its structure. The frontend renders null fields with appropriate fallback UI — empty chart slots with a "data unavailable" label, not errors.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- VECTOR SEARCH -->
+<div class="section" id="vector-search">
+  <div class="section-eyebrow">Query path 2</div>
+  <div class="section-title">Vector similarity search</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">After the structured data fetch, FastAPI embeds the occupation name via Voyage AI and runs a cosine similarity search against <code>research_chunk</code> to retrieve the four most semantically relevant research passages. Voyage's only role at query time is producing this single embedding — it never touches structured data.</p>
+
+  <!-- QUERY-TIME FLOW -->
+  <div class="flow" style="margin-bottom:20px;">
+    <div class="flow-step">
+      <div class="flow-step-num">01</div>
+      <div class="flow-step-title">Form query text</div>
+      <div class="flow-step-desc">Compose a natural language query from the occupation name. e.g. <em>"AI impact on Software Developers"</em></div>
+      <span class="flow-step-tag tag-query">per request</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">02</div>
+      <div class="flow-step-title">Embed query</div>
+      <div class="flow-step-desc">Single Voyage API call. Returns one 1,024-float vector. Same model used at ingest time.</div>
+      <span class="flow-step-tag tag-ext">voyage api</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">03</div>
+      <div class="flow-step-title">Cosine search</div>
+      <div class="flow-step-desc">pgvector <code>&lt;=&gt;</code> operator finds the 4 chunks with lowest cosine distance to the query vector.</div>
+      <span class="flow-step-tag tag-query">per request</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">04</div>
+      <div class="flow-step-title">Join source metadata</div>
+      <div class="flow-step-desc">Fetch <code>source_title</code>, <code>source_url</code>, <code>published_date</code> from <code>research_source</code> for citation rendering.</div>
+      <span class="flow-step-tag tag-query">per request</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">05</div>
+      <div class="flow-step-title">Return to caller</div>
+      <div class="flow-step-desc">4 chunks with text + citation metadata passed to context assembly.</div>
+      <span class="flow-step-tag tag-query">per request</span>
+    </div>
+  </div>
+
+  <div class="code-wrap" style="margin-bottom:16px;">
+    <div class="code-label">Query-time embedding + similarity search</div>
+    <div class="code-block"><span class="fn">async def</span> <span class="fn">search_research_corpus</span>(
+    session: AsyncSession,
+    query_text: <span class="k">str</span>,
+    limit: <span class="k">int</span> = <span class="n">4</span>
+) -> <span class="k">list</span>[ResearchChunkWithSource]:
+
+    <span class="c"># Step 1: embed the query via Voyage</span>
+    result = voyage.<span class="fn">embed</span>([query_text], model=<span class="v">"voyage-3"</span>)
+    query_vector = result.embeddings[<span class="n">0</span>]  <span class="c"># list[float], len=1024</span>
+
+    <span class="c"># Step 2: cosine similarity search in pgvector</span>
+    <span class="c"># &lt;=&gt; is cosine distance (lower = more similar)</span>
+    rows = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(
+            ResearchChunk.chunk_text,
+            ResearchChunk.chunk_index,
+            ResearchSource.source_title,
+            ResearchSource.source_url,
+            ResearchSource.published_date,
+            (<span class="n">1</span> - ResearchChunk.embedding.<span class="fn">cosine_distance</span>(query_vector)).<span class="fn">label</span>(<span class="v">"similarity"</span>)
+        )
+        .<span class="fn">join</span>(ResearchSource, ResearchChunk.research_source_id == ResearchSource.id)
+        .<span class="fn">order_by</span>(ResearchChunk.embedding.<span class="fn">cosine_distance</span>(query_vector))
+        .<span class="fn">limit</span>(limit)
+    )
+    <span class="k">return</span> [ResearchChunkWithSource(**row._mapping) <span class="k">for</span> row <span class="k">in</span> rows]</div>
+  </div>
+
+  <div class="cols-2">
+    <div class="card">
+      <div class="card-title">pgvector index</div>
+      <ul>
+        <li>Index type: <code>ivfflat</code> with <code>lists=100</code> — appropriate for a corpus of 500–2,000 chunks. Trades a small amount of recall for faster search.</li>
+        <li>For a corpus this size the performance difference vs exact search is negligible, but <code>ivfflat</code> is the correct habit for when the corpus grows.</li>
+        <li>Index is on <code>research_chunk(embedding vector_cosine_ops)</code></li>
+        <li>Created in the Alembic migration after the <code>pgvector</code> extension is enabled.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Query text composition</div>
+      <ul>
+        <li>The query text passed to Voyage is not just the bare occupation name. A richer query produces better retrieval: <code>"AI impact and automation risk for {occupation_name}"</code></li>
+        <li>On <code>search_research</code> tool calls from Claude during follow-ups, the query text is Claude's own formulation — passed through as-is from the tool input. This is intentional: Claude's query reflects what it actually needs, which is often more specific than a generic occupation query.</li>
+        <li>Query text is never logged — it may reflect user message content in follow-up contexts.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- CONTEXT ASSEMBLY -->
+<div class="section" id="context-assembly">
+  <div class="section-eyebrow">Query path 3</div>
+  <div class="section-title">Context assembly</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">After the structured fetch and vector search complete, FastAPI assembles the Claude prompt. The structured data and research chunks are formatted into a human-readable plaintext block — not JSON. Plaintext is more token-efficient and Claude reads it more reliably than deeply nested JSON for prompt inputs.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="code-wrap" style="margin-bottom:0;">
+      <div class="code-label">Initial analysis context (~800–1,000 tokens)</div>
+      <div class="code-block">Occupation: <span class="v">Software Developers</span> (SOC <span class="v">15-1252</span>)
+Major group: <span class="v">Computer and Mathematical Occupations</span>
+
+<span class="k">EXPOSURE</span> (Pew Research 2023)
+  Score: <span class="n">0.62</span> (medium)
+  Tasks automatable: <span class="n">58%</span>
+  Top automatable tasks:
+    - Write code to create applications [<span class="n">4.8</span>, core]
+    - Develop testing routines [<span class="n">4.2</span>, core]
+    - Document technical specifications [<span class="n">3.9</span>, supplemental]
+
+<span class="k">WAGES</span> (BLS OEWS 2024, national)
+  p10: <span class="n">$79,000</span> | p25: <span class="n">$108,000</span> | median: <span class="n">$132,000</span>
+  p75: <span class="n">$162,000</span> | p90: <span class="n">$208,000</span> | mean: <span class="n">$138,000</span>
+
+<span class="k">PROJECTIONS</span> (BLS 2023–2033)
+  Base: <span class="n">1,469,200</span> → Projected: <span class="n">1,849,800</span>
+  Change: <span class="n">+380,600</span> (<span class="n">+25.9%</span>)
+  Category: Much faster than average
+
+<span class="k">RESEARCH</span>
+  [<span class="n">1</span>] <span class="v">"WEF Future of Jobs 2025"</span> (<span class="n">2025-01-01</span>)
+  {chunk_text}
+
+  [<span class="n">2</span>] <span class="v">"Pew AI and the Future of Work"</span> (<span class="n">2023-07-26</span>)
+  {chunk_text}
+  <span class="c">// ... 2 more chunks</span></div>
+    </div>
+    <div class="code-wrap" style="margin-bottom:0;">
+      <div class="code-label">Follow-up condensed context (~200–300 tokens)</div>
+      <div class="code-block"><span class="k">OCCUPATION CONTEXT</span>
+  Software Developers · SOC 15-1252
+  Exposure: <span class="n">0.62</span> (medium) | Automatable: <span class="n">58%</span>
+  Wages: median <span class="n">$132k</span> | p10: <span class="n">$79k</span> | p90: <span class="n">$208k</span>
+  Projection 2023–2033: <span class="n">+25.9%</span> (much faster than average)
+
+<span class="k">PRIOR ANALYSIS</span>
+  {analysis.summary_text}
+
+<span class="c">The user is asking a follow-up question.
+Tools available if fresh data is needed.</span>
+
+
+<span class="c"># Conversation history follows (last 8 messages):</span>
+<span class="k">user:</span>     <span class="v">"What tasks are most at risk?"</span>
+<span class="k">assistant:</span> <span class="v">"The three tasks with highest automation...</span>"
+<span class="k">user:</span>     <span class="v">"How does that compare to nurses?"</span></div>
+    </div>
+  </div>
+
+  <div class="card-green">
+    <div class="card-title">Why plaintext over JSON for prompt context</div>
+    <ul>
+      <li>JSON structural characters (<code>{}</code>, <code>[]</code>, <code>""</code>, commas) consume tokens without adding meaning. A plaintext wage line like <code>median: $132,000</code> is roughly half the tokens of its JSON equivalent.</li>
+      <li>Claude reads and reasons about structured plaintext at least as reliably as JSON for prompt inputs — this is distinct from tool call <em>outputs</em>, where JSON is the correct format.</li>
+      <li>Plaintext is easier to read during development and debugging. You can print the assembled context and immediately see what Claude sees.</li>
+      <li>The <code>summary_json</code> payload (stored in the DB, sent in the SSE <code>data</code> event) is still JSON — it needs to be machine-parseable on the frontend for chart rendering. The distinction is prompt input vs structured output.</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="divider"/>
+<div class="group-label">Reference</div>
+
+<!-- VOYAGE AI -->
+<div class="section" id="voyage">
+  <div class="section-eyebrow">Reference</div>
+  <div class="section-title">Voyage AI integration</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">Voyage AI is an embedding model provider. Its role in this system is narrow and well-defined: convert text to 1,024-dimensional vectors. It is called at ingestion time (once, for the entire corpus) and at query time (once per analysis request, for the occupation query). It never handles structured data, user PII, or conversation content.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Integration points</div>
+      <ul>
+        <li><strong>Ingestion (once):</strong> <code>scripts/embed_corpus.py</code> — embeds all research chunks in batches. ~500–1,000 API calls total across all documents. Cost: ~$1–2.</li>
+        <li><strong>Query time (per analysis):</strong> <code>app/services/vector_search.py</code> — embeds the occupation query string. One API call, &lt;100ms, fraction of a cent.</li>
+        <li><strong>Tool call (conditional):</strong> When Claude invokes <code>search_research</code> during a follow-up, FastAPI calls Voyage to embed Claude's query string before running the pgvector search. Same code path as the initial analysis query.</li>
+        <li>Voyage is never called for: user message text, structured data, JWT validation, or anything outside the two contexts above.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Model &amp; configuration</div>
+      <ul>
+        <li>Model: <code>voyage-3</code> — current flagship model, 1,024 dimensions, strong retrieval benchmark performance</li>
+        <li>Input type: <code>document</code> at ingestion time, <code>query</code> at search time — Voyage optimizes the embedding differently for each. Always specify the correct input type.</li>
+        <li>Batch size: 100 at ingestion. The Voyage API accepts up to 128 texts per call; 100 is a conservative default.</li>
+        <li>Auth: <code>VOYAGE_API_KEY</code> environment variable. Read by the client on initialization.</li>
+        <li>Rate limit: Voyage free tier is sufficient for corpus ingestion with a 500ms delay between batches. Upgrade if corpus grows significantly.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-label">Client initialization and correct input_type usage</div>
+    <div class="code-block"><span class="k">import</span> voyageai
+
+<span class="c"># Initialize once at module level — client reads VOYAGE_API_KEY from env</span>
+voyage_client = voyageai.<span class="fn">Client</span>()
+
+<span class="c"># At ingestion: use input_type="document"</span>
+<span class="c"># Voyage optimizes document embeddings for storage and retrieval</span>
+<span class="fn">def</span> <span class="fn">embed_documents</span>(texts: <span class="k">list</span>[<span class="k">str</span>]) -> <span class="k">list</span>[<span class="k">list</span>[<span class="k">float</span>]]:
+    result = voyage_client.<span class="fn">embed</span>(texts, model=<span class="v">"voyage-3"</span>, input_type=<span class="v">"document"</span>)
+    <span class="k">return</span> result.embeddings
+
+<span class="c"># At query time: use input_type="query"</span>
+<span class="c"># Voyage optimizes query embeddings for similarity matching against stored documents</span>
+<span class="fn">def</span> <span class="fn">embed_query</span>(text: <span class="k">str</span>) -> <span class="k">list</span>[<span class="k">float</span>]:
+    result = voyage_client.<span class="fn">embed</span>([text], model=<span class="v">"voyage-3"</span>, input_type=<span class="v">"query"</span>)
+    <span class="k">return</span> result.embeddings[<span class="n">0</span>]
+
+<span class="c"># The asymmetric input_type is intentional and important.</span>
+<span class="c"># Documents and queries are embedded into different subspaces</span>
+<span class="c"># optimized for retrieval — using "document" for both degrades recall.</span></div>
+  </div>
+
+  <div class="card-amber">
+    <div class="card-title">Dimension consistency is critical</div>
+    <p>Every vector in <code>research_chunk.embedding</code> must be produced by the same model (<code>voyage-3</code>, 1,024 dimensions) as the query-time embedding. If you switch models or change the embedding dimension, all stored vectors become incomparable with new query vectors — you must re-embed the entire corpus. The model name is not stored in the database in V1; treat it as a configuration constant and document it here.</p>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- SOC MATCHING -->
+<div class="section" id="soc-matching">
+  <div class="section-eyebrow">Reference</div>
+  <div class="section-title">SOC code matching</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">All four ingestion sources use SOC codes as their occupation identifier, but they do not all format them identically. Code normalization must happen before any database lookup — a mismatch here silently drops rows rather than raising an error.</p>
+
+  <div class="cols-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Known format variations</div>
+      <ul>
+        <li>Canonical format (used in the database): <code>15-1252</code> — two digits, hyphen, four digits</li>
+        <li>BLS OEWS files sometimes emit <code>151252</code> — no hyphen. Normalize by inserting hyphen at position 2.</li>
+        <li>BLS OOH projection files occasionally include a trailing zero for broad-level codes used as detailed proxies: <code>15-1250</code>. These may not match a <code>soc_detailed_occupation</code> row — log as a miss rather than failing silently.</li>
+        <li>Pew dataset uses the canonical format consistently — least likely to cause issues.</li>
+        <li>Leading/trailing whitespace in CSV cells. Always <code>.strip()</code> before lookup.</li>
+      </ul>
+    </div>
+    <div class="code-wrap" style="margin-bottom:0;">
+      <div class="code-label">SOC normalization function</div>
+      <div class="code-block"><span class="fn">def</span> <span class="fn">normalize_soc_code</span>(raw: <span class="k">str</span>) -> <span class="k">str</span>:
+    code = raw.<span class="fn">strip</span>()
+
+    <span class="c"># Insert hyphen if missing: "151252" → "15-1252"</span>
+    <span class="k">if</span> <span class="fn">len</span>(code) == <span class="n">6</span> <span class="k">and</span> code.<span class="fn">isdigit</span>():
+        code = f<span class="v">"{code[:2]}-{code[2:]}"</span>
+
+    <span class="c"># Validate expected format</span>
+    <span class="k">if not</span> re.<span class="fn">match</span>(<span class="v">r"^\d{2}-\d{4}$"</span>, code):
+        <span class="k">raise</span> ValueError(f<span class="v">"Unexpected SOC format: {raw!r}"</span>)
+
+    <span class="k">return</span> code</div>
+    </div>
+  </div>
+
+  <div class="card-blue">
+    <div class="card-title">SOC revision mismatch</div>
+    <ul>
+      <li>The database stores <code>revision_year = 2018</code> throughout. BLS OEWS 2024 uses SOC 2018. Pew 2023 uses SOC 2018. These are consistent.</li>
+      <li>Some BLS projection files and O*NET data still reference SOC 2010 codes for certain occupations. If you encounter codes with no match in the database, check whether a SOC 2010 → 2018 crosswalk is needed. BLS publishes a crosswalk file for this purpose.</li>
+      <li>In V1, unmatched codes are logged and skipped — not failed. A post-ingestion log review should confirm the miss count is small (&lt;10) and not systematic.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
