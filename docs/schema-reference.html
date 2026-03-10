@@ -3,119 +3,301 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Labor Market AI — Schema Reference</title>
+<title>Labor Market AI — Schema Reference v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #080d18;
-    --surface: #0f172a;
-    --surface2: #1e293b;
-    --border: #1e293b;
-    --border2: #334155;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --faint: #334155;
-    --accent: #38bdf8;
-    --green: #3ecf8e;
-    --amber: #f59e0b;
-    --purple: #a78bfa;
-    --red: #f87171;
-    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --paper:        #f5f2ec;
+    --paper2:       #ece8df;
+    --paper3:       #e2ddd3;
+    --rule:         #d8d2c8;
+    --rule2:        #bfb8ad;
+    --ink:          #0e0f11;
+    --text:         #1a1b1e;
+    --muted:        #7a736a;
+    --faint:        #b0a99f;
+    --accent:       #b5622a;
+    --accent-light: #f7ece2;
+    --accent-dark:  #8c3f18;
+    --green:        #2e6b4a;
+    --green-light:  #eaf3ee;
+    --green-mid:    #c2dccb;
+    --amber:        #8a5a00;
+    --amber-light:  #fdf3dc;
+    --amber-mid:    #e8d090;
+    --purple:       #5a3a80;
+    --purple-light: #f2eef8;
+    --purple-mid:   #c8b8e0;
+    --red:          #9b2020;
+    --red-light:    #fdf0f0;
+    --red-mid:      #e0b8b8;
+    --blue:         #1e4a80;
+    --blue-light:   #eef3fa;
+    --blue-mid:     #b8cce0;
+    --serif:        'Source Serif 4', Georgia, serif;
+    --sans:         'IBM Plex Sans', system-ui, sans-serif;
+    --mono:         'IBM Plex Mono', 'Courier New', monospace;
   }
+
   body {
-    background: var(--bg);
+    background: var(--paper);
     color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    line-height: 1.7;
-    padding: 40px 24px 80px;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.65;
+    padding: 52px 32px 100px;
   }
-  .page-header { max-width: 900px; margin: 0 auto 48px; border-bottom: 1px solid var(--border2); padding-bottom: 24px; }
-  .page-header .label { color: var(--muted); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
-  .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #f8fafc; margin-bottom: 10px; }
-  .page-header p { color: var(--muted); font-size: 12px; max-width: 620px; line-height: 1.8; }
 
-  .toc { max-width: 900px; margin: 0 auto 48px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
-  .toc-title { color: var(--muted); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
-  .toc-section { margin-bottom: 14px; }
+  /* ── PAGE HEADER ── */
+  .page-header {
+    max-width: 900px; margin: 0 auto 52px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 28px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+  }
+  .page-header .label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  }
+  .page-header h1 {
+    font-family: var(--serif); font-size: 30px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--ink); margin-bottom: 12px; line-height: 1.15;
+  }
+  .page-header p {
+    font-size: 13px; color: var(--muted); max-width: 560px; line-height: 1.8;
+  }
+  .page-header-meta {
+    font-family: var(--mono); font-size: 9.5px; color: var(--faint);
+    text-align: right; line-height: 1.9; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    max-width: 900px; margin: 0 auto 52px;
+    background: #fff; border: 1px solid var(--rule);
+    border-radius: 6px; padding: 22px 26px;
+  }
+  .toc-title {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 18px;
+  }
+  .toc-section { margin-bottom: 16px; }
   .toc-section:last-child { margin-bottom: 0; }
-  .toc-section-label { color: var(--muted); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
-  .toc-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; }
-  .toc-list a { color: var(--accent); text-decoration: none; font-size: 12px; }
-  .toc-list a:hover { text-decoration: underline; }
+  .toc-section-label {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+  }
+  .toc-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .toc-list a {
+    font-family: var(--mono); font-size: 11.5px; color: var(--accent);
+    text-decoration: none; transition: color 0.12s;
+  }
+  .toc-list a:hover { color: var(--accent-dark); text-decoration: underline; }
 
-  .group-label { max-width: 900px; margin: 0 auto 24px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); padding-bottom: 8px; border-bottom: 1px solid #78350f; }
+  /* ── GROUP LABEL ── */
+  .group-label {
+    max-width: 900px; margin: 0 auto 28px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--amber);
+    padding-bottom: 10px; border-bottom: 1px solid var(--amber-mid);
+  }
 
-  .table-section { max-width: 900px; margin: 0 auto 56px; }
-  .table-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border2); }
-  .table-name { font-size: 16px; font-weight: 700; color: #f8fafc; letter-spacing: -0.01em; }
-  .table-name code { color: var(--accent); font-size: 14px; }
-  .table-source { font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 10px; white-space: nowrap; margin-top: 2px; }
-  .table-desc { color: var(--muted); font-size: 12px; margin-bottom: 20px; line-height: 1.8; max-width: 680px; }
+  /* ── TABLE SECTION ── */
+  .table-section { max-width: 900px; margin: 0 auto 64px; }
+  .table-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 14px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .table-name {
+    font-family: var(--serif); font-size: 22px; font-weight: 600;
+    color: var(--ink); letter-spacing: -0.01em; line-height: 1.2;
+  }
+  .table-name code {
+    font-family: var(--mono); font-size: 18px; color: var(--accent);
+    font-weight: 400;
+  }
+  .table-subtitle {
+    font-family: var(--sans); font-size: 12px; color: var(--muted);
+    margin-top: 4px; font-weight: 400;
+  }
+  .table-source {
+    font-family: var(--mono); font-size: 9.5px; color: var(--muted);
+    background: var(--paper2); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 4px 11px; white-space: nowrap;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .table-desc {
+    font-size: 13px; color: var(--muted); margin-bottom: 18px;
+    line-height: 1.85; max-width: 700px;
+  }
 
-  .fields-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .fields-table thead tr { background: var(--surface2); }
-  .fields-table thead th { padding: 10px 14px; text-align: left; font-size: 9.5px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid var(--border2); }
-  .fields-table tbody tr { background: var(--surface); border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  /* ── FIELDS TABLE ── */
+  .fields-table {
+    width: 100%; border-collapse: collapse;
+    border: 1px solid var(--rule); border-radius: 6px; overflow: hidden;
+  }
+  .fields-table thead tr { background: var(--paper2); }
+  .fields-table thead th {
+    padding: 10px 14px; text-align: left;
+    font-family: var(--mono); font-size: 9px; color: var(--muted);
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+    border-bottom: 1px solid var(--rule);
+  }
+  .fields-table tbody tr {
+    background: #fff; border-bottom: 1px solid var(--rule);
+    transition: background 0.1s;
+  }
   .fields-table tbody tr:last-child { border-bottom: none; }
-  .fields-table tbody tr:hover { background: #131f35; }
-  .fields-table td { padding: 11px 14px; vertical-align: top; font-size: 12px; }
-  .field-name { color: #f8fafc; font-weight: 600; white-space: nowrap; }
+  .fields-table tbody tr:hover { background: var(--paper); }
+  .fields-table td { padding: 12px 14px; vertical-align: top; }
+
+  .field-name {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--ink); white-space: nowrap;
+  }
   .field-name.pk { color: var(--amber); }
   .field-name.fk { color: var(--purple); }
-  .field-type { color: var(--green); white-space: nowrap; font-size: 11px; }
-  .field-source { color: var(--muted); font-size: 11px; }
-  .field-notes { color: #94a3b8; font-size: 11.5px; line-height: 1.7; }
-  code { color: var(--accent); }
+  .field-type {
+    font-family: var(--mono); font-size: 11px; color: var(--green);
+    white-space: nowrap;
+  }
+  .field-source {
+    font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+  }
+  .field-notes {
+    font-size: 12.5px; color: var(--muted); line-height: 1.75;
+  }
+  .field-notes code { font-family: var(--mono); font-size: 11px; color: var(--accent); }
 
-  .badge { display: inline-block; font-size: 9px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-  .badge-pk { background: #78350f; color: var(--amber); border: 1px solid #92400e; }
-  .badge-fk { background: #3b0764; color: var(--purple); border: 1px solid #6d28d9; }
-  .badge-opt { background: #0f2920; color: #4ade80; border: 1px solid #166534; }
-  .badge-req { background: #1a0a0a; color: var(--red); border: 1px solid #7f1d1d; }
-  .badge-gen { background: #172033; color: var(--accent); border: 1px solid #1e4976; }
+  /* global inline code */
+  code { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
 
-  .constraints { margin-top: 14px; background: #111822; border: 1px solid var(--border2); border-radius: 8px; padding: 14px 18px; }
-  .constraints-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; font-family: var(--mono); font-size: 8px;
+    padding: 1px 6px; border-radius: 3px; margin-left: 5px;
+    vertical-align: middle; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-pk { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
+  .badge-fk { background: var(--purple-light); color: var(--purple); border: 1px solid var(--purple-mid); }
+  .badge-opt { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+  .badge-req { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); }
+  .badge-gen { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-mid); }
+
+  /* ── CALLOUT BLOCKS ── */
+  .constraints {
+    margin-top: 12px; background: var(--paper2);
+    border: 1px solid var(--rule); border-radius: 5px; padding: 13px 17px;
+  }
+  .constraints-title {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 9px; font-weight: 500;
+  }
   .constraints ul { list-style: none; }
-  .constraints li { font-size: 11.5px; color: #94a3b8; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
-  .constraints li::before { content: '◆'; position: absolute; left: 0; color: var(--faint); font-size: 8px; top: 5px; }
+  .constraints li {
+    font-family: var(--mono); font-size: 11.5px; color: var(--text);
+    padding: 3px 0 3px 14px; position: relative; line-height: 1.7;
+  }
+  .constraints li::before {
+    content: '◆'; position: absolute; left: 0;
+    color: var(--rule2); font-size: 7px; top: 6px;
+  }
 
-  .note { margin-top: 14px; background: #0c1a0f; border: 1px solid #1a4a2a; border-left: 3px solid #3ecf8e; border-radius: 0 8px 8px 0; padding: 14px 18px; }
-  .note-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; font-weight: 700; }
+  .note {
+    margin-top: 12px; background: var(--green-light);
+    border: 1px solid var(--green-mid); border-left: 3px solid var(--green);
+    border-radius: 0 5px 5px 0; padding: 13px 17px;
+  }
+  .note-title {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 9px; font-weight: 600;
+  }
   .note ul { list-style: none; }
-  .note li { font-size: 11.5px; color: #86efac; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
-  .note li::before { content: '→'; position: absolute; left: 0; color: var(--green); opacity: 0.6; }
+  .note li {
+    font-size: 12.5px; color: #2a5a3a; padding: 3px 0 3px 16px;
+    position: relative; line-height: 1.75;
+  }
+  .note li::before { content: '→'; position: absolute; left: 0; color: var(--green); opacity: 0.7; }
+  .note li code { font-family: var(--mono); font-size: 11px; color: var(--green); }
 
-  .open-q { margin-top: 14px; background: #140d1f; border: 1px solid #3b1f6b; border-left: 3px solid var(--purple); border-radius: 0 8px 8px 0; padding: 14px 18px; }
-  .open-q-title { font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; font-weight: 700; }
+  .open-q {
+    margin-top: 12px; background: var(--purple-light);
+    border: 1px solid var(--purple-mid); border-left: 3px solid var(--purple);
+    border-radius: 0 5px 5px 0; padding: 13px 17px;
+  }
+  .open-q-title {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--purple); margin-bottom: 9px; font-weight: 600;
+  }
   .open-q ul { list-style: none; }
-  .open-q li { font-size: 11.5px; color: #c4b5fd; padding: 3px 0 3px 14px; position: relative; line-height: 1.7; }
-  .open-q li::before { content: '?'; position: absolute; left: 0; color: var(--purple); opacity: 0.6; font-weight: 700; }
+  .open-q li {
+    font-size: 12.5px; color: #3a2055; padding: 3px 0 3px 16px;
+    position: relative; line-height: 1.75;
+  }
+  .open-q li::before { content: '?'; position: absolute; left: 0; color: var(--purple); opacity: 0.7; font-weight: 700; }
 
-  .divider { max-width: 900px; margin: 0 auto 56px; border: none; border-top: 1px solid var(--border); }
+  /* ── DIVIDER ── */
+  .divider {
+    max-width: 900px; margin: 0 auto 64px;
+    border: none; border-top: 1px solid var(--rule);
+  }
 
-  .conventions { max-width: 900px; margin: 0 auto 56px; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 24px; }
-  .conventions h2 { font-size: 14px; font-weight: 700; color: #f8fafc; margin-bottom: 20px; }
-  .conv-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); font-size: 11.5px; }
+  /* ── CONVENTIONS ── */
+  .conventions {
+    max-width: 900px; margin: 0 auto 56px;
+    background: #fff; border: 1px solid var(--rule);
+    border-radius: 6px; padding: 26px 28px;
+  }
+  .conventions h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    color: var(--ink); margin-bottom: 22px; letter-spacing: -0.01em;
+  }
+  .conv-item {
+    margin-bottom: 16px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule); font-size: 12.5px;
+  }
   .conv-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
   .conv-rule { color: var(--text); font-weight: 600; margin-bottom: 4px; }
-  .conv-example { color: var(--muted); }
+  .conv-example { color: var(--muted); line-height: 1.7; }
+  .conv-example code { font-family: var(--mono); font-size: 11px; color: var(--accent); }
 
+  /* ── KEY JOINS / SECURITY ── */
   .rel-section { max-width: 900px; margin: 0 auto 56px; }
-  .rel-section h2 { font-size: 14px; font-weight: 700; color: #f8fafc; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border2); }
-  .rel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .rel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-  .rel-q { font-size: 11.5px; color: #94a3b8; margin-bottom: 8px; font-style: italic; }
-  .rel-tables { font-size: 11px; color: var(--accent); }
+  .rel-section h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    color: var(--ink); margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule); letter-spacing: -0.01em;
+  }
+  .rel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rel-card {
+    background: #fff; border: 1px solid var(--rule);
+    border-radius: 5px; padding: 14px 16px;
+    transition: border-color 0.12s;
+  }
+  .rel-card:hover { border-color: var(--rule2); }
+  .rel-q {
+    font-size: 12px; color: var(--muted); margin-bottom: 8px;
+    font-style: italic; line-height: 1.5;
+  }
+  .rel-tables {
+    font-family: var(--mono); font-size: 10.5px; color: var(--accent); line-height: 1.6;
+  }
 </style>
 </head>
 <body>
 
 <div class="page-header">
-  <div class="label">Labor Market AI · Data Model</div>
-  <h1>Schema Reference</h1>
-  <p>Field-by-field reference reflecting all naming and design decisions. Green callouts = rationale. Purple callouts = open questions still to resolve.</p>
+  <div>
+    <div class="label">Labor &amp; AI · Data Model</div>
+    <h1>Schema Reference</h1>
+    <p>Field-by-field reference for all tables, fields, and naming decisions. Green callouts = rationale. Purple callouts = open questions. v4 adds <code>app_user</code>, <code>app_user_occupation_analysis</code>, <code>app_user_chat_message</code>; switches auth to Supabase-brokered GitHub OAuth.</p>
+  </div>
+  <div class="page-header-meta">v4 · March 2026<br>13 tables · light theme</div>
 </div>
 
 <div class="toc">
@@ -145,8 +327,19 @@
     </ul>
   </div>
   <div class="toc-section">
+    <div class="toc-section-label">Application Layer — user, session, and messaging tables</div>
+    <ul class="toc-list">
+      <li><a href="#app_user">app_user</a></li>
+      <li><a href="#app_user_occupation_analysis">app_user_occupation_analysis</a></li>
+      <li><a href="#app_user_chat_message">app_user_chat_message</a></li>
+    </ul>
+  </div>
+  <div class="toc-section">
     <div class="toc-section-label">Reference</div>
-    <ul class="toc-list"><li><a href="#relationships">Key joins</a></li></ul>
+    <ul class="toc-list">
+      <li><a href="#relationships">Key joins</a></li>
+      <li><a href="#security">Security &amp; token limiting</a></li>
+    </ul>
   </div>
 </div>
 
@@ -183,7 +376,7 @@
   </div>
   <div class="conv-item">
     <div class="conv-rule">Timestamps (datetime with time zone): <code>_utc</code> suffix, always stored in UTC</div>
-    <div class="conv-example"><code>created_at_utc</code>, <code>updated_at_utc</code> on every table</div>
+    <div class="conv-example"><code>created_at_utc</code>, <code>updated_at_utc</code> on mutable tables. Immutable tables (<code>app_user_occupation_analysis</code>, <code>app_user_chat_message</code>) carry <code>created_at_utc</code> only — omitting <code>updated_at_utc</code> enforces write-once semantics at the schema level.</div>
   </div>
   <div class="conv-item">
     <div class="conv-rule">Dates (calendar date, no time component): no <code>_utc</code> suffix</div>
@@ -197,6 +390,14 @@
     <div class="conv-rule">FK field names: <code>{table_name}_id</code> for UUID surrogate FKs</div>
     <div class="conv-example">e.g. <code>soc_detailed_occupation_id</code> on operational tables, <code>soc_major_group_id</code> on <code>soc_minor_group</code> — the <code>_id</code> suffix signals a UUID FK. String natural keys use descriptive names like <code>detailed_occupation_code</code>.</div>
   </div>
+  <div class="conv-item">
+    <div class="conv-rule">Application layer tables: <code>app_user_</code> prefix</div>
+    <div class="conv-example">Tables that belong to the application's user-facing data model — as opposed to the reference/operational data from external sources — are prefixed <code>app_user_</code> where they are user-scoped. <code>app_user</code> itself is the root; <code>app_user_occupation_analysis</code> and <code>app_user_chat_message</code> extend it.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Immutable records: no <code>updated_at_utc</code></div>
+    <div class="conv-example">Records that must never be edited after insert — analysis outputs, chat messages — omit <code>updated_at_utc</code>. The absence of the field signals intent. If a message is wrong, a new record is appended; old records are never mutated.</div>
+  </div>
 </div>
 
 <!-- SOC TABLES -->
@@ -207,7 +408,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>soc_major_group</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Top level of the SOC taxonomy. 23 groups.</div>
+      <div class="table-subtitle">Top level of the SOC taxonomy. 23 groups.</div>
     </div>
     <div class="table-source">Source: BLS 2018 SOC Structure</div>
   </div>
@@ -264,7 +465,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>soc_minor_group</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Second level of the SOC taxonomy. ~100 groups.</div>
+      <div class="table-subtitle">Second level of the SOC taxonomy. ~100 groups.</div>
     </div>
     <div class="table-source">Source: BLS 2018 SOC Structure</div>
   </div>
@@ -327,7 +528,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>soc_broad_occupation</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Third level of the SOC taxonomy. ~450 groups.</div>
+      <div class="table-subtitle">Third level of the SOC taxonomy. ~450 groups.</div>
     </div>
     <div class="table-source">Source: BLS 2018 SOC Structure</div>
   </div>
@@ -390,7 +591,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>soc_detailed_occupation</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Leaf level of the SOC taxonomy. ~830 occupations. All operational tables reference this one.</div>
+      <div class="table-subtitle">Leaf level of the SOC taxonomy. ~830 occupations. All operational tables reference this one.</div>
     </div>
     <div class="table-source">Source: BLS 2018 SOC Structure + O*NET descriptions</div>
   </div>
@@ -468,7 +669,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>occupation_geo_estimate</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Employment counts and wage estimates by occupation and geography. One row per occupation × geography × year.</div>
+      <div class="table-subtitle">Employment counts and wage estimates by occupation and geography. One row per occupation × geography × year.</div>
     </div>
     <div class="table-source">Source: BLS OEWS (annual)</div>
   </div>
@@ -592,7 +793,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>occupation_ai_exposure</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">AI automation exposure scores per occupation. One row per occupation per scoring methodology.</div>
+      <div class="table-subtitle">AI automation exposure scores per occupation. One row per occupation per scoring methodology.</div>
     </div>
     <div class="table-source">Source: Pew Research Center (derived from O*NET task data)</div>
   </div>
@@ -672,7 +873,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>occupation_projection</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">10-year employment outlook per occupation. One row per occupation per projection cycle.</div>
+      <div class="table-subtitle">10-year employment outlook per occupation. One row per occupation per projection cycle.</div>
     </div>
     <div class="table-source">Source: BLS Employment Projections 2023–2033 (published every 2 years)</div>
   </div>
@@ -764,7 +965,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>occupation_task</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Individual work tasks per occupation, with AI automation risk per task. ~10–30 rows per occupation.</div>
+      <div class="table-subtitle">Individual work tasks per occupation, with AI automation risk per task. ~10–30 rows per occupation.</div>
     </div>
     <div class="table-source">Source: O*NET task database + Pew automation classifications</div>
   </div>
@@ -840,7 +1041,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>research_source</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">One row per source document in the RAG corpus. Parent of <code>research_chunk</code>.</div>
+      <div class="table-subtitle">One row per source document in the RAG corpus. Parent of <code>research_chunk</code>.</div>
     </div>
     <div class="table-source">Source: manually curated — WEF, Pew, BLS, journalism</div>
   </div>
@@ -908,7 +1109,7 @@
   <div class="table-header">
     <div>
       <div class="table-name"><code>research_chunk</code></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px;">Chunked text with vector embeddings. Child of <code>research_source</code>. The RAG retrieval unit.</div>
+      <div class="table-subtitle">Chunked text with vector embeddings. Child of <code>research_source</code>. The RAG retrieval unit.</div>
     </div>
     <div class="table-source">Source: chunked + embedded at ingestion time</div>
   </div>
@@ -971,6 +1172,254 @@
 </div>
 <hr class="divider"/>
 
+<!-- APPLICATION LAYER TABLES -->
+<div class="group-label">Application Layer — user, session, and messaging tables</div>
+
+<!-- APP_USER -->
+<div class="table-section" id="app_user">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>app_user</code></div>
+      <div class="table-subtitle">One row per authenticated user. Application-level profile extending Supabase's internal <code>auth.users</code>.</div>
+    </div>
+    <div class="table-source">Source: created on first GitHub OAuth sign-in via Supabase Auth</div>
+  </div>
+  <p class="table-desc">
+    Supabase Auth brokers the GitHub OAuth flow and creates a row in its internal <code>auth.users</code> table.
+    This table is the application's own profile record, linked to <code>auth.users</code> via <code>supabase_user_id</code>.
+    FastAPI validates the Supabase-issued JWT on every request and resolves the caller to an <code>app_user</code> row.
+    All user-scoped application data FKs here, not to <code>auth.users</code> directly.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Used as FK target by all application-layer tables.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">supabase_user_id</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">Supabase Auth</td>
+        <td class="field-notes">References <code>auth.users.id</code> in Supabase's internal schema. The link between this application profile and the Supabase-managed auth record. Unique — one app_user per Supabase auth identity.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">github_user_id</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">bigint</span></td>
+        <td class="field-source">GitHub OAuth</td>
+        <td class="field-notes">GitHub's immutable integer user ID. This is the stable, deduplication-safe identifier — it never changes even if the user renames their account. <code>bigint</code> not <code>text</code>; GitHub IDs are integers.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">github_login</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">text</span></td>
+        <td class="field-source">GitHub OAuth</td>
+        <td class="field-notes">GitHub username at time of last sign-in. e.g. <code>"jpratt"</code>. Display only — mutable, GitHub users can rename themselves. Never use as a join key. Updated on each successful sign-in to stay current.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">timestamptz</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert. Records when the user first signed in.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">updated_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">timestamptz</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert and update. Updated on each sign-in so <code>github_login</code> can be refreshed if the user has renamed their account.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul>
+      <li>UNIQUE (supabase_user_id)</li>
+      <li>UNIQUE (github_user_id)</li>
+    </ul>
+  </div>
+  <div class="note">
+    <div class="note-title">Auth flow</div>
+    <ul>
+      <li>Supabase Auth handles the GitHub OAuth dance. FastAPI receives a Supabase JWT in the Authorization header and verifies it using Supabase's public JWKS endpoint — no Auth.js, no separate OAuth library needed.</li>
+      <li>On first sign-in: Supabase creates <code>auth.users</code> row → FastAPI creates <code>app_user</code> row. On subsequent sign-ins: FastAPI upserts <code>github_login</code> in case of rename.</li>
+      <li>Scope requested from GitHub: <code>read:user</code> only. No email, no repo access.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- APP_USER_OCCUPATION_ANALYSIS -->
+<div class="table-section" id="app_user_occupation_analysis">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>app_user_occupation_analysis</code></div>
+      <div class="table-subtitle">One row per user × occupation analysis session. The session container for all subsequent chat messages.</div>
+    </div>
+    <div class="table-source">Source: generated by FastAPI + Claude on occupation selection</div>
+  </div>
+  <p class="table-desc">
+    Created when a user selects an occupation and Claude synthesizes the initial analysis.
+    Functions simultaneously as a document (holds the generated analysis) and a session container
+    (all <code>app_user_chat_message</code> rows for this conversation FK here).
+    Records are immutable after insert — no <code>updated_at_utc</code>.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key. Referenced by <code>app_user_chat_message.app_user_occupation_analysis_id</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">app_user_id</span><span class="badge badge-fk">FK</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">References <code>app_user.id</code>. Required — all analysis sessions are user-scoped in V1.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">References <code>soc_detailed_occupation.id</code>. The occupation this analysis is for.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">summary_text</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">text</span></td>
+        <td class="field-source">Claude API</td>
+        <td class="field-notes">The prose Claude generated — what the user reads. Plain text with inline citation markers e.g. <code>[1]</code>, <code>[2]</code>. Stored as-generated; never edited.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">summary_json</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">jsonb</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">Structured data payload assembled for this analysis: Pew exposure score and tier, wage percentiles, employment projection, top automatable tasks, citation metadata. Enables re-rendering charts without re-querying the underlying tables. Schema is application-defined and may evolve.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">model_name</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">text</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">The Claude model string used to generate this analysis. e.g. <code>"claude-sonnet-4-5"</code>. Stored for auditability — useful if model is upgraded and you want to identify analyses generated by older versions.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">timestamptz</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert. No <code>updated_at_utc</code> — this record is immutable after creation.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <div class="note-title">Design notes</div>
+    <ul>
+      <li>No <code>updated_at_utc</code>: the record is write-once. If analysis needs to be regenerated (e.g. model upgrade), insert a new row. Old rows are retained for audit and comparison.</li>
+      <li>A user can have multiple analysis rows for the same occupation — each represents a distinct session. No unique constraint on <code>(app_user_id, soc_detailed_occupation_id)</code>.</li>
+      <li>"When was this session last active?" requires <code>SELECT MAX(created_at_utc) FROM app_user_chat_message WHERE app_user_occupation_analysis_id = ?</code>. Acceptable at this scale.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- APP_USER_CHAT_MESSAGE -->
+<div class="table-section" id="app_user_chat_message">
+  <div class="table-header">
+    <div>
+      <div class="table-name"><code>app_user_chat_message</code></div>
+      <div class="table-subtitle">One row per message turn within an analysis session. Append-only.</div>
+    </div>
+    <div class="table-source">Source: user input + Claude API responses</div>
+  </div>
+  <p class="table-desc">
+    Stores every message turn in a follow-up conversation — both user messages and assistant replies.
+    Always attached to an <code>app_user_occupation_analysis</code> session.
+    Records are immutable: no edits, no deletes. If a response must be retried, a new row is appended.
+    Ordered by <code>created_at_utc</code> within a session.
+  </p>
+  <table class="fields-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="field-name pk">id</span><span class="badge badge-pk">PK</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Surrogate key.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">app_user_id</span><span class="badge badge-fk">FK</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">References <code>app_user.id</code>. Denormalized from the parent analysis for efficient "fetch all messages for user" queries without an extra join.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">app_user_occupation_analysis_id</span><span class="badge badge-fk">FK</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">References <code>app_user_occupation_analysis.id</code>. Groups all messages belonging to one analysis session. Required — messages are always session-scoped.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name fk">soc_detailed_occupation_id</span><span class="badge badge-fk">FK</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">UUID</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">References <code>soc_detailed_occupation.id</code>. Denormalized from the parent analysis. Makes "fetch all messages for occupation X" a single-table query — a hot path worth the redundancy.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">role</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">text</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">CHECK constraint: <code>'user'</code> | <code>'assistant'</code>. Mirrors the Claude API's message role vocabulary exactly.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">message_text</span><span class="badge badge-req">req</span></td>
+        <td><span class="field-type">text</span></td>
+        <td class="field-source">user / Claude API</td>
+        <td class="field-notes">The message content. For <code>role='user'</code>: the raw input after server-side validation and sanitization (max 2,000 chars enforced at API layer). For <code>role='assistant'</code>: Claude's response text.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">model_name</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">text | null</span></td>
+        <td class="field-source">application</td>
+        <td class="field-notes">Null for <code>role='user'</code> messages. For <code>role='assistant'</code>: the Claude model string used. e.g. <code>"claude-sonnet-4-5"</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">prompt_tokens</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">Claude API</td>
+        <td class="field-notes">Null for <code>role='user'</code>. For <code>role='assistant'</code>: input token count from the Claude API response. Used to compute per-user token consumption for budget enforcement.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">output_tokens</span><span class="badge badge-opt">opt</span></td>
+        <td><span class="field-type">int | null</span></td>
+        <td class="field-source">Claude API</td>
+        <td class="field-notes">Null for <code>role='user'</code>. For <code>role='assistant'</code>: output token count. Combined with <code>prompt_tokens</code> for total consumption: <code>SUM(prompt_tokens + output_tokens)</code> per user per period.</td>
+      </tr>
+      <tr>
+        <td><span class="field-name">created_at_utc</span><span class="badge badge-gen">auto</span></td>
+        <td><span class="field-type">timestamptz</span></td>
+        <td class="field-source">generated</td>
+        <td class="field-notes">Auto-set on insert. The canonical ordering field within a session — ORDER BY created_at_utc ASC. No <code>updated_at_utc</code>: records are immutable.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="constraints">
+    <div class="constraints-title">Constraints</div>
+    <ul>
+      <li>CHECK (role IN ('user', 'assistant'))</li>
+    </ul>
+  </div>
+  <div class="note">
+    <div class="note-title">Design notes</div>
+    <ul>
+      <li>No <code>updated_at_utc</code>: append-only by design. A message is never edited. A failed or unwanted assistant response is handled by inserting a new pair, not updating the old one.</li>
+      <li>No <code>message_index</code>: <code>created_at_utc</code> with millisecond precision is sufficient for ordering sequential chat turns. Revisit if pagination or guaranteed ordinal display becomes necessary.</li>
+      <li>No <code>response_to_message_id</code>: conversation is linear. A tree structure adds complexity with no V1 benefit.</li>
+      <li>Token budget enforcement: <code>SELECT SUM(prompt_tokens + output_tokens) FROM app_user_chat_message WHERE app_user_id = ? AND created_at_utc > [period_start]</code>. FastAPI checks this before each Claude call and returns 429 if over budget.</li>
+    </ul>
+  </div>
+</div>
+<hr class="divider"/>
+
 <!-- KEY JOINS -->
 <div class="rel-section" id="relationships">
   <h2>Key joins — canonical questions → tables</h2>
@@ -1006,6 +1455,66 @@
     <div class="rel-card">
       <div class="rel-q">"Where do I fall in my occupation's wage distribution?"</div>
       <div class="rel-tables">occupation_geo_estimate (geo_type='national') wage percentile columns</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Fetch a user's full conversation for an analysis session"</div>
+      <div class="rel-tables">app_user_occupation_analysis ⟶ app_user_chat_message ORDER BY created_at_utc ASC</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"How many tokens has this user consumed this month?"</div>
+      <div class="rel-tables">app_user_chat_message WHERE app_user_id = ? AND role = 'assistant' AND created_at_utc > period_start → SUM(prompt_tokens + output_tokens)</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"What analyses has this user run?"</div>
+      <div class="rel-tables">app_user ⟶ app_user_occupation_analysis ⟶ soc_detailed_occupation (name, code)</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">"Re-render charts for a saved analysis without re-querying BLS"</div>
+      <div class="rel-tables">app_user_occupation_analysis.summary_json (structured payload stored at generation time)</div>
+    </div>
+  </div>
+</div>
+<hr class="divider"/>
+
+<!-- SECURITY & TOKEN LIMITING -->
+<div class="rel-section" id="security">
+  <h2>Security &amp; token limiting</h2>
+  <div class="rel-grid">
+    <div class="rel-card">
+      <div class="rel-q">Layer 1 — Vercel edge</div>
+      <div class="rel-tables">IP-based rate limiting before requests reach the application. First line of defense against scrapers and bots. No app code involved.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 2 — Supabase JWT validation</div>
+      <div class="rel-tables">FastAPI rejects any request without a valid Supabase-issued JWT. Verified against Supabase's public JWKS endpoint. Gates all data access behind authentication.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 3 — Upstash rate limiting</div>
+      <div class="rel-tables">Per-user query budget keyed by GitHub user ID. TTL resets hourly. FastAPI returns 429 before Claude is called. Handles legitimate over-use, not bad actors.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 4 — Pydantic input validation</div>
+      <div class="rel-tables">Every FastAPI endpoint declares a strict schema. message_text: max 2,000 chars. Occupation search input: length-bounded and stripped. Malformed payloads rejected before business logic.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 5 — Prompt injection defense</div>
+      <div class="rel-tables">User input only ever appears in the 'user' turn of the Claude API call. System prompt is fully server-controlled and never interpolated with user-supplied strings. This is the single most critical rule.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 6 — Claude max_tokens cap</div>
+      <div class="rel-tables">Hard max_tokens on every Claude API call: 2,048 for initial analysis, 1,024 for follow-ups. Prevents runaway generation cost from any single request.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 7 — Context window discipline</div>
+      <div class="rel-tables">Follow-up calls send last 6–8 messages only, not full history. Older turns are not summarized in V1 — simply truncated. Caps per-request token cost as conversations grow.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 8 — Monthly token budget</div>
+      <div class="rel-tables">SUM(prompt_tokens + output_tokens) per user per calendar month queried from app_user_chat_message before each Claude call. Hard block (429) if over threshold. Threshold TBD based on cost targets.</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-q">Layer 9 — Input blocklist (V1)</div>
+      <div class="rel-tables">Server-side check for known prompt injection patterns ("ignore previous instructions", "you are now", etc.) applied to message_text before prompt assembly. Lightweight V1 approach — replace with Claude-as-classifier in V2 if needed.</div>
     </div>
   </div>
 </div>

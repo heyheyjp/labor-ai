@@ -278,7 +278,7 @@
     <h1>Data Ingest &amp; Query</h1>
     <p>How data enters the system, how it is stored and indexed, and how it is retrieved at query time to assemble context for Claude. Covers all four ingestion sources and both query paths: structured data fetch and vector similarity search.</p>
   </div>
-  <div class="page-header-meta">v1 · March 2026<br>4 sources · 2 query paths</div>
+  <div class="page-header-meta">v2 · March 2026<br>5 sources · 2 query paths</div>
 </div>
 
 <!-- DATA SOURCES OVERVIEW -->
@@ -733,6 +733,82 @@ voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYA
 </div>
 
 <hr class="divider"/>
+
+<!-- OCCUPATION EMBEDDINGS -->
+<div class="section" id="occupation-embeddings">
+  <div class="section-eyebrow">Ingestion · Script 5</div>
+  <div class="section-title">Occupation name embeddings</div>
+  <hr class="section-rule"/>
+  <p class="section-desc">All ~830 occupation names are embedded once at ingestion time and stored on <code>soc_detailed_occupation</code>. This eliminates a Voyage API round-trip from the hot path of <code>POST /analyses</code> — initial analysis requests retrieve the pre-computed vector directly from Postgres instead of calling the Voyage API live. Voyage is still called at query time when Claude invokes the <code>search_research</code> tool on follow-up messages, since those query strings are arbitrary and cannot be pre-computed.</p>
+
+  <div class="flow" style="margin-bottom:20px;">
+    <div class="flow-step">
+      <div class="flow-step-num">01</div>
+      <div class="flow-step-title">Fetch occupation names</div>
+      <div class="flow-step-desc">SELECT <code>id</code>, <code>detailed_occupation_name</code> WHERE <code>embedding IS NULL</code>. Idempotent — skips already-embedded rows.</div>
+      <span class="flow-step-tag tag-ingest">once</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">02</div>
+      <div class="flow-step-title">Batch embed via Voyage</div>
+      <div class="flow-step-desc">Send occupation names in batches of 100. Use <code>input_type="query"</code> (same type used at search time). Returns 1,024-float vectors per name.</div>
+      <span class="flow-step-tag tag-ext">voyage api</span>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">03</div>
+      <div class="flow-step-title">Store embeddings</div>
+      <div class="flow-step-desc">UPDATE <code>soc_detailed_occupation SET embedding = $vector WHERE id = $id</code> for each row in the batch.</div>
+      <span class="flow-step-tag tag-ingest">once</span>
+    </div>
+  </div>
+
+  <div class="code-wrap" style="margin-bottom:16px;">
+    <div class="code-label">embed_occupations.py — core loop</div>
+    <div class="code-block"><span class="fn">async def</span> <span class="fn">embed_occupation_names</span>(session: AsyncSession) -> <span class="k">None</span>:
+    voyage = voyageai.<span class="fn">Client</span>()
+
+    <span class="c"># Only process rows that haven't been embedded yet</span>
+    rows = (<span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(SocDetailedOccupation.id, SocDetailedOccupation.detailed_occupation_name)
+        .<span class="fn">where</span>(SocDetailedOccupation.embedding == <span class="k">None</span>)
+    )).<span class="fn">all</span>()
+
+    <span class="k">for</span> batch <span class="k">in</span> <span class="fn">chunks</span>(rows, size=<span class="n">100</span>):
+        names = [r.detailed_occupation_name <span class="k">for</span> r <span class="k">in</span> batch]
+        result = voyage.<span class="fn">embed</span>(names, model=<span class="v">"voyage-3"</span>, input_type=<span class="v">"query"</span>)
+
+        <span class="k">for</span> row, vector <span class="k">in</span> <span class="fn">zip</span>(batch, result.embeddings):
+            <span class="k">await</span> session.<span class="fn">execute</span>(
+                <span class="fn">update</span>(SocDetailedOccupation)
+                .<span class="fn">where</span>(SocDetailedOccupation.id == row.id)
+                .<span class="fn">values</span>(embedding=vector)
+            )
+        <span class="k">await</span> session.<span class="fn">commit</span>()
+        <span class="fn">time.sleep</span>(<span class="n">0.2</span>)  <span class="c"># Voyage rate limit headroom</span></div>
+  </div>
+
+  <div class="cols-2">
+    <div class="card">
+      <div class="card-title">Schema requirement</div>
+      <ul>
+        <li>Requires an <code>embedding vector(1024)</code> column on <code>soc_detailed_occupation</code> — add in the Phase 2 Alembic migration</li>
+        <li>Add an <code>ivfflat</code> index on the column if occupation-to-occupation similarity queries are needed later. Not required for V1 (the column is only read by direct ID lookup).</li>
+        <li>Total storage: ~830 × 1024 floats × 4 bytes ≈ 3.4 MB. Negligible.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Cost &amp; timing</div>
+      <ul>
+        <li>~830 embed calls at Voyage pricing. Total cost: under $0.01.</li>
+        <li>Runs after the SOC taxonomy seed (Script 0) and before <code>POST /analyses</code> can be deployed to production.</li>
+        <li>Idempotent — safe to re-run. Skips any rows that already have a non-null embedding.</li>
+        <li>Voyage is still called live when Claude invokes <code>search_research</code> on follow-up queries — those strings are arbitrary and cannot be pre-computed.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
 <div class="group-label">Query time</div>
 
 <!-- STRUCTURED FETCH -->
@@ -740,7 +816,7 @@ voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYA
   <div class="section-eyebrow">Query path 1</div>
   <div class="section-title">Structured data fetch</div>
   <hr class="section-rule"/>
-  <p class="section-desc">When a user submits an occupation for analysis, FastAPI executes a single Postgres round-trip that retrieves all structured data needed for the prompt: wages, exposure score, employment projection, and top automatable tasks. This happens before any call to Voyage AI or Claude.</p>
+  <p class="section-desc">When a user submits an occupation for analysis, FastAPI executes a single Postgres round-trip that retrieves all structured data needed for the prompt: wages, exposure score, employment projection, and top automatable tasks. This happens before any call to Claude.</p>
 
   <div class="code-wrap" style="margin-bottom:16px;">
     <div class="code-label">Single-round-trip data fetch (SQLAlchemy)</div>
@@ -798,36 +874,30 @@ voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYA
   <div class="section-eyebrow">Query path 2</div>
   <div class="section-title">Vector similarity search</div>
   <hr class="section-rule"/>
-  <p class="section-desc">After the structured data fetch, FastAPI embeds the occupation name via Voyage AI and runs a cosine similarity search against <code>research_chunk</code> to retrieve the four most semantically relevant research passages. Voyage's only role at query time is producing this single embedding — it never touches structured data.</p>
+  <p class="section-desc">After the structured data fetch, FastAPI retrieves the pre-computed occupation embedding from <code>soc_detailed_occupation.embedding</code> and runs a cosine similarity search against <code>research_chunk</code> to find the four most semantically relevant research passages. No Voyage API call is needed on the initial analysis path. Voyage is only called live when Claude invokes the <code>search_research</code> tool on follow-up messages, where the query string is arbitrary and can't be pre-computed.</p>
 
   <!-- QUERY-TIME FLOW -->
   <div class="flow" style="margin-bottom:20px;">
     <div class="flow-step">
       <div class="flow-step-num">01</div>
-      <div class="flow-step-title">Form query text</div>
-      <div class="flow-step-desc">Compose a natural language query from the occupation name. e.g. <em>"AI impact on Software Developers"</em></div>
+      <div class="flow-step-title">Fetch pre-computed embedding</div>
+      <div class="flow-step-desc">SELECT <code>embedding</code> FROM <code>soc_detailed_occupation</code> WHERE <code>id = $occupation_id</code>. Returns stored 1,024-float vector. No external API call.</div>
       <span class="flow-step-tag tag-query">per request</span>
     </div>
     <div class="flow-step">
       <div class="flow-step-num">02</div>
-      <div class="flow-step-title">Embed query</div>
-      <div class="flow-step-desc">Single Voyage API call. Returns one 1,024-float vector. Same model used at ingest time.</div>
-      <span class="flow-step-tag tag-ext">voyage api</span>
-    </div>
-    <div class="flow-step">
-      <div class="flow-step-num">03</div>
       <div class="flow-step-title">Cosine search</div>
-      <div class="flow-step-desc">pgvector <code>&lt;=&gt;</code> operator finds the 4 chunks with lowest cosine distance to the query vector.</div>
+      <div class="flow-step-desc">pgvector <code>&lt;=&gt;</code> operator finds the 4 chunks with lowest cosine distance to the occupation embedding.</div>
       <span class="flow-step-tag tag-query">per request</span>
     </div>
     <div class="flow-step">
-      <div class="flow-step-num">04</div>
+      <div class="flow-step-num">03</div>
       <div class="flow-step-title">Join source metadata</div>
       <div class="flow-step-desc">Fetch <code>source_title</code>, <code>source_url</code>, <code>published_date</code> from <code>research_source</code> for citation rendering.</div>
       <span class="flow-step-tag tag-query">per request</span>
     </div>
     <div class="flow-step">
-      <div class="flow-step-num">05</div>
+      <div class="flow-step-num">04</div>
       <div class="flow-step-title">Return to caller</div>
       <div class="flow-step-desc">4 chunks with text + citation metadata passed to context assembly.</div>
       <span class="flow-step-tag tag-query">per request</span>
@@ -835,19 +905,18 @@ voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYA
   </div>
 
   <div class="code-wrap" style="margin-bottom:16px;">
-    <div class="code-label">Query-time embedding + similarity search</div>
-    <div class="code-block"><span class="fn">async def</span> <span class="fn">search_research_corpus</span>(
+    <div class="code-label">Initial analysis — DB lookup + similarity search (no Voyage call)</div>
+    <div class="code-block"><span class="fn">async def</span> <span class="fn">search_research_for_occupation</span>(
     session: AsyncSession,
-    query_text: <span class="k">str</span>,
+    occupation_id: UUID,
     limit: <span class="k">int</span> = <span class="n">4</span>
 ) -> <span class="k">list</span>[ResearchChunkWithSource]:
 
-    <span class="c"># Step 1: embed the query via Voyage</span>
-    result = voyage.<span class="fn">embed</span>([query_text], model=<span class="v">"voyage-3"</span>)
-    query_vector = result.embeddings[<span class="n">0</span>]  <span class="c"># list[float], len=1024</span>
+    <span class="c"># Step 1: retrieve pre-computed occupation embedding — no Voyage API call</span>
+    occ = <span class="k">await</span> session.<span class="fn">get</span>(SocDetailedOccupation, occupation_id)
+    query_vector = occ.embedding  <span class="c"># vector(1024) stored at ingestion time</span>
 
     <span class="c"># Step 2: cosine similarity search in pgvector</span>
-    <span class="c"># &lt;=&gt; is cosine distance (lower = more similar)</span>
     rows = <span class="k">await</span> session.<span class="fn">execute</span>(
         <span class="fn">select</span>(
             ResearchChunk.chunk_text,
@@ -856,6 +925,32 @@ voyage = voyageai.<span class="fn">Client</span>()  <span class="c"># reads VOYA
             ResearchSource.source_url,
             ResearchSource.published_date,
             (<span class="n">1</span> - ResearchChunk.embedding.<span class="fn">cosine_distance</span>(query_vector)).<span class="fn">label</span>(<span class="v">"similarity"</span>)
+        )
+        .<span class="fn">join</span>(ResearchSource, ResearchChunk.research_source_id == ResearchSource.id)
+        .<span class="fn">order_by</span>(ResearchChunk.embedding.<span class="fn">cosine_distance</span>(query_vector))
+        .<span class="fn">limit</span>(limit)
+    )
+    <span class="k">return</span> [ResearchChunkWithSource(**row._mapping) <span class="k">for</span> row <span class="k">in</span> rows]</div>
+  </div>
+
+  <div class="code-wrap" style="margin-bottom:16px;">
+    <div class="code-label">Follow-up search_research tool — live Voyage call (arbitrary query string)</div>
+    <div class="code-block"><span class="fn">async def</span> <span class="fn">search_research_corpus</span>(
+    session: AsyncSession,
+    query_text: <span class="k">str</span>,  <span class="c"># arbitrary string from Claude's tool invocation</span>
+    limit: <span class="k">int</span> = <span class="n">4</span>
+) -> <span class="k">list</span>[ResearchChunkWithSource]:
+
+    <span class="c"># Must call Voyage here — query string is not pre-computable</span>
+    result = voyage.<span class="fn">embed</span>([query_text], model=<span class="v">"voyage-3"</span>, input_type=<span class="v">"query"</span>)
+    query_vector = result.embeddings[<span class="n">0</span>]
+
+    rows = <span class="k">await</span> session.<span class="fn">execute</span>(
+        <span class="fn">select</span>(
+            ResearchChunk.chunk_text,
+            ResearchSource.source_title,
+            ResearchSource.source_url,
+            ResearchSource.published_date,
         )
         .<span class="fn">join</span>(ResearchSource, ResearchChunk.research_source_id == ResearchSource.id)
         .<span class="fn">order_by</span>(ResearchChunk.embedding.<span class="fn">cosine_distance</span>(query_vector))

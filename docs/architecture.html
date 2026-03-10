@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Labor & AI — System Architecture v3</title>
+<title>Labor & AI — System Architecture v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -146,7 +146,7 @@
     <h1 class="doc-title">Deployment <em>&amp;</em> Data Flow</h1>
   </div>
   <div class="doc-meta">
-    v3 · March 2026<br>
+    v4 · March 2026<br>
     Railway backend · all services
   </div>
 </div>
@@ -285,7 +285,7 @@
   <text x="370" y="222" font-family="'IBM Plex Sans',sans-serif"
     font-size="13" font-weight="600" fill="#ffffff">Next.js · React · TypeScript</text>
   <text x="370" y="240" font-family="'IBM Plex Mono',monospace"
-    font-size="9" fill="#888">Auth.js + GitHub OAuth · Sentry Browser SDK · IP rate limiting at edge</text>
+    font-size="9" fill="#888">Supabase Auth · GitHub OAuth · Sentry Browser SDK · IP rate limiting at edge</text>
 
   <!-- Railway / FastAPI -->
   <rect x="354" y="326" width="540" height="72" rx="4"
@@ -475,11 +475,11 @@
     <tr>
       <td>Frontend</td>
       <td>Next.js · Vercel</td>
-      <td>React/TypeScript app deployed on Vercel edge. Occupation search UI, results rendering, follow-up input. Auth.js handles GitHub OAuth session. Sentry Browser SDK for JS errors and Web Vitals.</td>
+      <td>React/TypeScript app deployed on Vercel edge. Occupation search UI, results rendering, follow-up input. Supabase Auth client handles GitHub OAuth session and JWT management. Sentry Browser SDK for JS errors and Web Vitals.</td>
     </tr>
     <tr>
       <td>Auth</td>
-      <td>GitHub OAuth · Auth.js</td>
+      <td>GitHub OAuth · Supabase Auth</td>
       <td>read:user scope only — GitHub username is the identity token. No email, no repo access. JWT session stored client-side. Vercel edge middleware handles IP-level rate limiting before requests reach the app.</td>
     </tr>
     <tr>
@@ -500,7 +500,7 @@
     <tr>
       <td>Primary DB</td>
       <td>Supabase · Postgres</td>
-      <td>Stores full SOC taxonomy (4 levels), occupation_geo_estimate, occupation_ai_exposure, occupation_projection, occupation_task, research_source. Written by ingestion scripts, read by FastAPI. Supabase free tier: 500MB, sufficient for seeded BLS/Pew/O*NET data.</td>
+      <td>Stores full SOC taxonomy (4 levels), occupation_geo_estimate, occupation_ai_exposure, occupation_projection, occupation_task, research_source. Written by ingestion scripts, read by FastAPI. Supabase is a separate managed service from Railway — FastAPI connects via Supabase's connection string with PgBouncer pooling enabled (required on the free tier). Supabase free tier: 500MB, sufficient for seeded BLS/Pew/O*NET data.</td>
     </tr>
     <tr>
       <td>Vector Store</td>
@@ -510,7 +510,7 @@
     <tr>
       <td>Embeddings</td>
       <td>Voyage AI · voyage-3</td>
-      <td>Called by ingestion scripts only — not at query time. Converts research text chunks to 1024-dim float vectors for pgvector storage. Free tier available for low volume. Voyage-3 chosen for strong performance on retrieval tasks.</td>
+      <td>Called at ingestion time to embed research text chunks. Also called at query time when Claude invokes the search_research tool on follow-up messages (arbitrary query strings cannot be pre-computed). Occupation name embeddings are pre-computed at ingestion and stored in soc_detailed_occupation — no Voyage call on the initial analysis request. Voyage-3 chosen for strong RAG retrieval performance. 1024-dim vectors.</td>
     </tr>
     <tr>
       <td>Observability</td>
@@ -544,7 +544,7 @@
     <tr>
       <td>1 · Auth</td>
       <td>Browser → GitHub</td>
-      <td>User clicks "Continue with GitHub." OAuth redirects to GitHub, returns authorization code. Auth.js exchanges for access token, reads username (read:user scope), persists JWT session cookie.</td>
+      <td>User clicks "Continue with GitHub." Supabase Auth handles the OAuth redirect to GitHub and callback. GitHub returns authorization code. Supabase exchanges for access token, reads username (read:user scope), creates auth.users row, and issues a signed JWT. Frontend stores the session via the Supabase JS client.</td>
     </tr>
     <tr>
       <td>2 · Search</td>
@@ -569,7 +569,7 @@
     <tr>
       <td>5b · Vector search</td>
       <td>Railway → Supabase pgvector</td>
-      <td>User's occupation label embedded via Voyage AI (or a cached query embedding). Top-k research_chunk rows retrieved by cosine similarity. research_source joined for citation metadata.</td>
+      <td>Occupation embedding is retrieved from soc_detailed_occupation (pre-computed at ingestion) — no Voyage call at initial analysis time. Top-k research_chunk rows retrieved by cosine similarity against the stored vector. research_source joined for citation metadata. Voyage called only if Claude invokes search_research on a follow-up.</td>
     </tr>
     <tr>
       <td>6 · Synthesis</td>

@@ -279,7 +279,7 @@
     <h1>Test Plan</h1>
     <p>Covers backend unit/integration tests (pytest), frontend tests, LLM-specific risks, and manual spot-check protocol. Priority is weighted toward LLM integration correctness over conventional coverage.</p>
   </div>
-  <div class="page-header-meta">v1 · March 2026<br>automated + manual</div>
+  <div class="page-header-meta">v2 · March 2026<br>automated + manual</div>
 </div>
 
 <!-- PRIORITY LEGEND -->
@@ -349,6 +349,21 @@
   <div class="conv-item">
     <div class="conv-rule">What is not covered</div>
     <div class="conv-example">End-to-end browser tests, load/performance testing, and formal LLM evals (automated scoring of analysis quality against a benchmark set) are out of scope for V1. The manual spot-check protocol is the pragmatic substitute for the last of these.</div>
+  </div>
+  <div class="conv-item">
+    <div class="conv-rule">Test data strategy — mock at the DB layer</div>
+    <div class="conv-example">
+      Unit tests never hit a real database. All DB-touching code paths are mocked at the SQLAlchemy session level via <code>pytest-mock</code>. A small, stable fixture set lives in <code>tests/fixtures/occupation_data.py</code> — six canned <code>OccupationData</code> objects covering the full range of test scenarios:
+      <ul style="margin-top:8px;list-style:none;">
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>15-1252</code> Software Developers — high wage, medium-high AI exposure, fast growth. The "interesting tension" case.</li>
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>29-1141</code> Registered Nurses — low exposure, strong growth, well-covered in research corpus.</li>
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>43-3031</code> Bookkeeping Clerks — high exposure, projected decline. Useful for testing decline + high-risk path.</li>
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>47-2111</code> Electricians — low exposure, skilled trades, physically grounded work. Tests the "AI-resistant" narrative path.</li>
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>19-1041</code> Epidemiologists — medium exposure, specialized research occupation. Tests mid-range exposure handling.</li>
+        <li style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:var(--accent);">·</span><code>53-6021</code> Parking Attendants — small workforce, low wages, potentially sparse BLS data and thin research corpus coverage. Edge case for suppressed values and low-similarity RAG retrieval.</li>
+      </ul>
+      Each fixture includes plausible wage, exposure, projection, and task data. Fixtures are the single source of truth for all backend unit tests — no test invents inline data.
+    </div>
   </div>
 </div>
 
