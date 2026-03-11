@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 
 # Misc. temporary files
 tmp/
+
+# IDEs
+.idea
