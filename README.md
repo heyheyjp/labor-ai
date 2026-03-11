@@ -13,9 +13,9 @@ The core value prop: answers about automation risk, job growth, and wages in pla
 | Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS v4 | Vercel |
 | Backend | FastAPI, Python 3.12 | Railway |
 | Database | Postgres 16 + pgvector | Supabase |
-| Auth | GitHub OAuth via Supabase Auth | — |
-| Rate limiting | Upstash Redis | Upstash |
-| LLM | Anthropic Claude Sonnet | Anthropic |
+| Auth | GitHub OAuth via Supabase Auth | Supabase |
+| Rate limiting | Redis | Upstash |
+| LLM | Claude Sonnet | Anthropic |
 | Embeddings | Voyage AI (voyage-3) | Voyage AI |
 
 ## Development — Backend
@@ -26,13 +26,12 @@ The core value prop: answers about automation risk, job growth, and wages in pla
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (local Postgres)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
-  - `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 **External services**
 
 The table below lists which services configuration values need to be set for.
 
-| Service | Keys needed | Where to find them | Notes |
+| Service | Values needed | Where to find them | Notes |
 |---|---|---|---|
 | [Supabase](https://supabase.com) | `SUPABASE_URL`<br>`SUPABASE_ANON_KEY`<br>`SUPABASE_JWT_SECRET` | Project Settings → API → "Project URL", "anon public", and "JWT Secret" | Also set up the GitHub OAuth provider under Authentication → Providers. |
 | [Anthropic](https://console.anthropic.com) | `ANTHROPIC_API_KEY` | Console → API Keys | Claude Sonnet |
@@ -40,7 +39,7 @@ The table below lists which services configuration values need to be set for.
 | [Upstash](https://console.upstash.com) | `UPSTASH_REDIS_REST_URL`<br>`UPSTASH_REDIS_REST_TOKEN` | Select the Redis database → REST API section | Create a Redis database. Used for per-user rate limiting. |
 | [Sentry](https://sentry.io) | `SENTRY_DSN` | Project Settings → Client Keys | Create a **Python** project for the backend. |
 
-**GitHub Auth** (via Supabase Auth)
+**User authentication** (GitHub via Supabase Auth)
 
 Create an OAuth app at [github.com/settings/developers](https://github.com/settings/developers). Set the callback URL to the one provided by Supabase (Authentication → Providers → GitHub). Paste the client ID and secret into Supabase. These do not appear in `backend/.env` directly; Supabase holds them.
 
