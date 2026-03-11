@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     supabase_anon_key: str
     supabase_jwt_secret: str
 
-    # Anthropic (optional until Phase 5)
+    # Anthropic
     anthropic_api_key: str = ""
 
-    # Optional services (empty string = not yet configured)
+    # Other services
     voyage_api_key: str = ""
     upstash_redis_rest_url: str = ""
     upstash_redis_rest_token: str = ""
