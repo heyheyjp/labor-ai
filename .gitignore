@@ -146,3 +146,31 @@ tmp/
 
 # IDEs
 .idea
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.venv/
+.uv/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Ruff
+.ruff_cache/
+
+# Per-service env files (examples are tracked)
+!.env.local.example
+backend/.env
+frontend/.env.local
