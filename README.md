@@ -22,8 +22,27 @@ The core value prop: answers about automation risk, job growth, and wages in pla
 
 ### Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — local Postgres
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) — Python package manager (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+**Tools**
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (local Postgres)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
+  - `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+**External services**
+
+The table below lists which services configuration values need to be set for.
+
+| Service | Keys needed | Where to find them | Notes |
+|---|---|---|---|
+| [Supabase](https://supabase.com) | `SUPABASE_URL`<br>`SUPABASE_ANON_KEY`<br>`SUPABASE_JWT_SECRET` | Project Settings → API → "Project URL", "anon public", and "JWT Secret" | Also set up the GitHub OAuth provider under Authentication → Providers. |
+| [Anthropic](https://console.anthropic.com) | `ANTHROPIC_API_KEY` | Console → API Keys | Claude Sonnet |
+| [Voyage AI](https://dash.voyageai.com) | `VOYAGE_API_KEY` | Dashboard → API Keys | Used for generating embeddings at ingestion time and at query time for research search. |
+| [Upstash](https://console.upstash.com) | `UPSTASH_REDIS_REST_URL`<br>`UPSTASH_REDIS_REST_TOKEN` | Select the Redis database → REST API section | Create a Redis database. Used for per-user rate limiting. |
+| [Sentry](https://sentry.io) | `SENTRY_DSN` | Project Settings → Client Keys | Create a **Python** project for the backend. |
+
+**GitHub Auth** (via Supabase Auth)
+
+Create an OAuth app at [github.com/settings/developers](https://github.com/settings/developers). Set the callback URL to the one provided by Supabase (Authentication → Providers → GitHub). Paste the client ID and secret into Supabase. These do not appear in `backend/.env` directly; Supabase holds them.
 
 ### First-time setup
 
@@ -40,11 +59,6 @@ This starts a `pgvector/pgvector:pg16` container (`labor_ai_db`) with the databa
 ```bash
 cp backend/.env.example backend/.env
 ```
-
-Fill in at minimum:
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET` — from your Supabase project settings
-
-`DATABASE_URL` is pre-filled for the local Docker container and works as-is. Other keys (`ANTHROPIC_API_KEY`, etc.) can be left blank until those features are needed.
 
 **3. Install dependencies and run migrations**
 
@@ -85,7 +99,7 @@ make backend-migrate
 
 ### Deployment
 
-Deployed to [Railway](https://railway.app) via `backend/Dockerfile`. Set all variables from `backend/.env.example` as environment variables in the Railway service dashboard. The service deploys automatically on push to `main`.
+The service is deployed to [Railway](https://railway.app) via `backend/Dockerfile`. All of the variables from `backend/.env.example` need to be set as environment variables in the Railway service dashboard. The service deploys automatically on push/merge to the `main` branch.
 
 ### Observability
 
@@ -94,5 +108,3 @@ Errors and performance are tracked via [Sentry](https://sentry.io) (Python SDK).
 ## Development — Frontend
 
 *Not yet implemented.*
-
-## More Docs
