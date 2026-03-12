@@ -1,5 +1,5 @@
 .PHONY: help up down db-reset \
-        backend-install backend-dev backend-lint backend-type backend-test backend-migrate backend-migration \
+        backend-install backend-dev backend-lint backend-lint-fix backend-format backend-type backend-test backend-migrate backend-migration \
         frontend-install frontend-dev frontend-lint frontend-type frontend-test frontend-format \
         ci-backend ci-frontend
 
@@ -28,6 +28,12 @@ backend-dev: ## Run FastAPI dev server (hot reload)
 
 backend-lint: ## Run ruff check + format check
 	cd backend && uv run ruff check . && uv run ruff format --check .
+
+backend-lint-fix: ## Auto-fix ruff lint violations in backend Python files
+	cd backend && uv run ruff check --fix .
+
+backend-format: ## Auto-format backend Python files with ruff
+	cd backend && uv run ruff format .
 
 backend-type: ## Run mypy strict type check
 	cd backend && uv run mypy app
