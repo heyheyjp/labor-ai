@@ -18,92 +18,149 @@ The core value prop: answers about automation risk, job growth, and wages in pla
 | LLM | Claude Sonnet | Anthropic |
 | Embeddings | Voyage AI (voyage-3) | Voyage AI |
 
-## Development — Backend
+## Prerequisites
 
-### Prerequisites
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) if not already installed (required locally for the Postgres database).
 
-**Tools**
+2. Run the setup command, which will install CLI tools ([uv](https://docs.astral.sh/uv/), [pnpm](https://pnpm.io/)) and project dependencies:
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (local Postgres)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
+    ```bash
+    make setup
+    ```
 
-**External services**
+## Configuration
 
-The table below lists which services configuration values need to be set for.
+### Backend
 
-| Service | Values needed | Where to find them | Notes |
-|---|---|---|---|
-| [Supabase](https://supabase.com) | `SUPABASE_URL`<br>`SUPABASE_ANON_KEY`<br>`SUPABASE_JWT_SECRET` | Project Settings → API → "Project URL", "anon public", and "JWT Secret" | Also set up the GitHub OAuth provider under Authentication → Providers. |
-| [Anthropic](https://console.anthropic.com) | `ANTHROPIC_API_KEY` | Console → API Keys | Claude Sonnet |
-| [Voyage AI](https://dash.voyageai.com) | `VOYAGE_API_KEY` | Dashboard → API Keys | Used for generating embeddings at ingestion time and at query time for research search. |
-| [Upstash](https://console.upstash.com) | `UPSTASH_REDIS_REST_URL`<br>`UPSTASH_REDIS_REST_TOKEN` | Select the Redis database → REST API section | Create a Redis database. Used for per-user rate limiting. |
-| [Sentry](https://sentry.io) | `SENTRY_DSN` | Project Settings → Client Keys | Create a **Python** project for the backend. |
+1. Copy the example config file:
 
-**User authentication** (GitHub via Supabase Auth)
+    ```bash
+    cp backend/.env.example backend/.env
+    ```
 
-Create an OAuth app at [github.com/settings/developers](https://github.com/settings/developers). Set the callback URL to the one provided by Supabase (Authentication → Providers → GitHub). Paste the client ID and secret into Supabase. These do not appear in `backend/.env` directly; Supabase holds them.
+2. Retrieve the values needed to configure your local environment for integration with external services, and save them in the copied config file:
 
-### First-time setup
+    | Service | Values needed | Where to find them | Notes |
+    |---|---|---|---|
+    | [Supabase](https://supabase.com) | `SUPABASE_URL`<br>`SUPABASE_ANON_KEY`<br>`SUPABASE_JWT_SECRET` | Project Settings → API → "Project URL", "anon public", and "JWT Secret" | Also set up the GitHub OAuth provider under Authentication → Providers. |
+    | [Anthropic](https://console.anthropic.com) | `ANTHROPIC_API_KEY` | Console → API Keys | Claude Sonnet |
+    | [Voyage AI](https://dash.voyageai.com) | `VOYAGE_API_KEY` | Dashboard → API Keys | Used for generating embeddings at ingestion time and at query time for research search. |
+    | [Upstash](https://console.upstash.com) | `UPSTASH_REDIS_REST_URL`<br>`UPSTASH_REDIS_REST_TOKEN` | Select the Redis database → REST API section | Create a Redis database. Used for per-user rate limiting. |
+    | [Sentry](https://sentry.io) | `SENTRY_DSN` | Project Settings → Client Keys | Create a **Python** project for the backend. |
 
-**1. Start the local database**
+### Frontend
 
-```bash
-make up
-```
+1. Copy the example config file:
 
-This starts a `pgvector/pgvector:pg16` container (`labor_ai_db`) with the database `labor_ai` on port 5432.
+    ```bash
+    cp frontend/.env.local.example frontend/.env.local
+    ```
 
-**2. Configure environment variables**
+2. Retrieve the values needed to configure your local environment for integration with external services, and save them in the copied config file:
 
-```bash
-cp backend/.env.example backend/.env
-```
+    | Service | Values needed | Where to find them | Notes |
+    |---|---|---|---|
+    | [Supabase](https://supabase.com) | `NEXT_PUBLIC_SUPABASE_URL`<br>`NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → "Project URL" and "anon public" | Same Supabase project as the backend. |
+    | [Sentry](https://sentry.io) | `NEXT_PUBLIC_SENTRY_DSN` | Project Settings → Client Keys | Create a **Next.js** project for the frontend (separate from the backend Python project). |
 
-**3. Install dependencies and run migrations**
+## Databases
 
-```bash
-make backend-install
-make backend-migrate
-```
+### Postgres: initializing the database
 
-### Running locally
+1. With Docker running, start the local Postgres db:
 
-```bash
-make backend-dev    # FastAPI on http://localhost:8000
-```
+    ```bash
+    make db-up
+    ```
 
-API docs are available at [http://localhost:8000/docs](http://localhost:8000/docs) in development.
+2. Run the db migrations
 
-### Code quality
+    ```bash
+    make db-migrate
+    ```
 
-```bash
-make backend-lint   # ruff check + format check
-make backend-type   # mypy (strict)
-make backend-test   # pytest (requires Docker DB running)
-```
-
-Or run the full CI sequence in one shot:
+### Postgres: creating a migration
 
 ```bash
-make ci-backend
-```
-
-### Database migrations
-
-```bash
-make backend-migration MSG="describe what changed"
+make db-create-migration MSG="describe what changed"
 # review the generated file in backend/migrations/versions/
-make backend-migrate
+make db-migrate
 ```
 
-### Deployment
+## Running the apps
 
-The service is deployed to [Railway](https://railway.app) via `backend/Dockerfile`. All of the variables from `backend/.env.example` need to be set as environment variables in the Railway service dashboard. The service deploys automatically on push/merge to the `main` branch.
+### Backend
 
-### Observability
+To start the API service:
+
+```bash
+make server-dev
+```
+
+The service is listening at http://localhost:8000.
+
+API docs are served at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+### Frontend
+
+To start the dev server for the web app:
+
+```bash
+make client-dev
+```
+
+The app is served at http://localhost:3000.
+
+## Code quality checks
+
+### Backend
+
+Commands for linting, formatting, type-checking, and testing:
+```bash
+make server-lint   # ruff check
+make server-format # format check
+make server-type   # mypy (strict)
+make server-test   # pytest (requires Docker DB running)
+```
+
+To run them all:
+
+```bash
+make ci-server
+```
+
+### Frontend
+
+Commands for linting, formatting, type-checking, and testing:
+```bash
+make client-lint    # ESLint
+make client-type    # TypeScript (tsc --noEmit)
+make client-test    # Vitest
+make client-format  # Prettier format check
+```
+
+To run them all:
+
+```bash
+make ci-client
+```
+
+## CI/CD
+
+### Backend
+
+The FastAPI service is automatically deployed to the production [Railway](https://railway.app) project on push/merge to the `main` branch.
+
+### Frontend
+
+The Next.js app is automatically deployed to the production [Vercel](https://vercel.com) project on push/merge to the `main` branch.
+
+## Observability
+
+### Backend
 
 Errors and performance are tracked via [Sentry](https://sentry.io) (Python SDK). Structured JSON logs include `request_id`, `app_user_id`, and per-phase timing for each analysis request. Token usage (prompt + output) is persisted to the database per message for cost tracking.
 
-## Development — Frontend
+### Frontend
 
-*Not yet implemented.*
+--

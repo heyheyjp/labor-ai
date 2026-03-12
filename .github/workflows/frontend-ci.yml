@@ -3,10 +3,14 @@ name: Frontend CI
 on:
   push:
     branches: [main]
-    paths: ["frontend/**"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
   pull_request:
     branches: [main]
-    paths: ["frontend/**"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
 
 jobs:
   lint-and-type-check:
@@ -24,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '20'
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
@@ -47,7 +51,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '20'
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
